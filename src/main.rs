@@ -1,5 +1,8 @@
 mod common;
+#[macro_use]
+mod utils;
 mod init;
+mod new;
 
 use crate::common::*;
 
@@ -27,12 +30,13 @@ enum Opt {
   Find { tag: String },
 }
 
-fn main() {
+fn main() -> Result<()> {
   match Opt::from_args() {
-    Opt::Init { path } => init::init(path),
-    Opt::New { name } => println!("{}", name),
+    Opt::Init { path } => init::init(path)?,
+    Opt::New { name } => new::new(name)?,
     Opt::Open { name } => println!("{}", name),
     Opt::Link { left, right } => println!("{} <-> {}", left, right),
     Opt::Find { tag } => println!("{}", tag),
   }
+  Ok(())
 }

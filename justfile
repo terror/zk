@@ -2,10 +2,10 @@ build:
 	cargo build
 
 test *args:
-	cargo test --{{args}}
+	cargo test -- --{{args}}
 
-run:
-	cargo run
+run *args:
+	cargo run {{args}}
 
 fmt:
 	cargo +nightly fmt
