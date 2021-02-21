@@ -1,0 +1,8 @@
+[package]
+name    = "zk"
+version = "0.1.0"
+authors = ["Liam <liam@scalzulli.com>"]
+edition = "2018"
+
+[dependencies]
+structopt = "0.3"
