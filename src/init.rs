@@ -6,7 +6,7 @@ use crate::common::*;
 
 // Notes:
 // - Check if file already exists and prompt user before overwrite
-// - Requires $EDITOR to be set
+// - Check for $EDITOR or default to vim
 
 #[derive(Serialize)]
 /// Default configuration file values
@@ -33,9 +33,14 @@ fn prompt_user() -> Result<()> {
 fn create_config(path: path::PathBuf) -> Result<()> {
   let home_dir = shellexpand::tilde("~");
 
+  let editor = match env::var("EDITOR") {
+    Ok(val) => val,
+    Err(_) => "vim".to_string(),
+  };
+
   let config = Default {
     path:   path.to_str().unwrap(),
-    editor: &env::var("EDITOR")?,
+    editor: &editor,
   };
 
   let toml = toml::to_string(&config).unwrap();

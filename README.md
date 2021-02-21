@@ -1,5 +1,7 @@
 ## `zk`
 
+![Build and Test](https://github.com/terror/zk/actions/workflows/rust.yml/badge.svg)
+
 A zettelkasten command line interface
 
 ## Installation
