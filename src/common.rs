@@ -2,9 +2,10 @@
 pub use std::{
   env,
   fs::{self, File},
-  io::{self, prelude::*},
+  io::{self, prelude::*, Cursor},
   path::{Path, PathBuf},
   process::Command,
+  str,
 };
 
 // dependencies
@@ -13,6 +14,7 @@ pub use colored::*;
 pub use dialoguer::{theme::ColorfulTheme, MultiSelect};
 pub use serde::{Deserialize, Serialize};
 pub use shellexpand;
+pub use skim::prelude::*;
 pub use snafu::{ResultExt, Snafu};
 pub use structopt::StructOpt;
 pub use toml;

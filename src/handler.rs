@@ -45,10 +45,8 @@ impl Handler {
         .unwrap()
         .to_owned();
 
-      let split: Vec<&str> = filename.rsplitn(2, '-').collect();
-
-      if let Some(candidate) = split.first() {
-        if *candidate == name {
+      if let Some(candidate) = Note::name(&filename) {
+        if candidate == name {
           candidates.push(format!("{}.md", filename));
         }
       }
@@ -102,8 +100,23 @@ impl Handler {
     Ok(())
   }
 
-  /// Starts a fuzzy search in the notes directory. Powered by FZF.
+  /// Starts a fuzzy search in the Zettelkasten directory.
+  /// Powered by `skim` --> https://github.com/lotabout/skim
   pub fn search(&self) -> Result<(), Error> {
+    env::set_current_dir(&self.path()).unwrap();
+
+    let options = SkimOptions::default();
+
+    let selected_items = Skim::run_with(&options, None)
+      .map(|out| out.selected_items)
+      .unwrap_or_else(|| Vec::new());
+
+    for item in selected_items.iter() {
+      if let Some(name) = Note::name(&item.output().to_string()) {
+        self.open(name)?;
+      }
+    }
+
     Ok(())
   }
 }
