@@ -1,10 +1,10 @@
 use crate::common::*;
 
-const FILENAME: &str = "zk.toml";
+const FILENAME: &str = ".zk.toml";
 
 const DEFAULT: &str = "
-path = '~/zk'
-editor = 'vim'
+path   = '~/.zk'
+editor = 'nvim'
 ";
 
 #[derive(Serialize, Deserialize, Default)]
@@ -48,7 +48,7 @@ impl Config {
 mod tests {
   use super::*;
 
-  fn expand_tilde(path: &PathBuf) -> PathBuf {
+  fn expand_tilde(path: &Path) -> PathBuf {
     PathBuf::from(shellexpand::tilde(path.to_str().unwrap()).to_string())
   }
 
@@ -60,14 +60,13 @@ mod tests {
 
     if Config::path().unwrap().is_none() {
       let config = config.unwrap();
+
       assert_eq!(
         expand_tilde(&config.path),
-        PathBuf::from(format!(
-          "{}/zk",
-          dirs::home_dir().unwrap().to_str().unwrap()
-        ))
+        Path::join(&dirs::home_dir().unwrap(), ".zk")
       );
-      assert_eq!(config.editor, "vim");
+
+      assert_eq!(config.editor, "nvim");
     }
   }
 }

@@ -3,10 +3,6 @@ use crate::common::*;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "zk")]
 pub enum Opt {
-  #[structopt(name = "init")]
-  /// Initialize a Zettelkasten directory
-  Init { path: Option<PathBuf> },
-
   #[structopt(name = "new")]
   /// Create a new Zettelkasten note
   New { name: String },
@@ -30,15 +26,16 @@ pub enum Opt {
 
 impl Opt {
   pub fn run(self) -> Result<(), Error> {
-    let config = Config::load()?;
+    let handler = Handler {
+      config: Config::load()?,
+    };
 
     match self {
-      Opt::Init { path } => Handler::init(&path)?,
-      Opt::New { name } => Handler::new(&name, config)?,
-      Opt::Open { name } => Handler::open(&name)?,
-      Opt::Link { left, right } => println!("{} <-> {}", left, right),
-      Opt::Find { tag } => println!("{}", tag),
-      Opt::Search => println!("search!"),
+      Opt::New { name } => handler.new(&name)?,
+      Opt::Open { name } => handler.open(&name)?,
+      Opt::Link { left, right } => handler.link(&left, &right)?,
+      Opt::Find { tag } => handler.find(&tag)?,
+      Opt::Search => handler.search()?,
     }
 
     Ok(())

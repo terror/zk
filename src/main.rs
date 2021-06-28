@@ -7,6 +7,7 @@ mod common;
 mod config;
 mod error;
 mod handler;
+mod note;
 mod opt;
 
 fn main() {

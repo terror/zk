@@ -7,11 +7,13 @@ edition = "2018"
 [dependencies]
 chrono      = "0.4.19"
 colored     = "2.0.0"
+dialoguer   = "0.8.0"
 dirs        = "3.0.2"
 shellexpand = "2.1.0"
 snafu       = "0.6.10"
 structopt   = "0.3.0"
 toml        = "0.5.8"
+walkdir     = "2.3.2"
 xdg         = "2.2.0"
 
 [dependencies.serde]
