@@ -17,6 +17,7 @@ pub use shellexpand;
 pub use skim::prelude::*;
 pub use snafu::{ResultExt, Snafu};
 pub use structopt::StructOpt;
+pub use termimad;
 pub use toml;
 pub use walkdir::WalkDir;
 pub use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
@@ -30,5 +31,6 @@ pub use tempfile::TempDir;
 
 // structs and enums
 pub use crate::{
-  config::Config, error::Error, expand::Expand, handler::Handler, note::Note, opt::Opt, part::Part,
+  config::Config, directory::Directory, error::Error, expand::Expand, handler::Handler, note::Note,
+  opt::Opt, part::Part, prompt::Prompt,
 };

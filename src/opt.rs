@@ -22,20 +22,30 @@ pub enum Opt {
   #[structopt(name = "search")]
   /// Fuzzy search Zettelkasten notes
   Search,
+
+  #[structopt(name = "dir")]
+  /// Zettelkasten storage location
+  Dir,
+
+  #[structopt(name = "preview")]
+  /// Preview an existing Zettelkasten note in the terminal
+  Preview { name: String },
 }
 
 impl Opt {
   pub fn run(self) -> Result<(), Error> {
-    let handler = Handler {
-      config: Config::load()?,
-    };
+    let config = Config::load()?;
+
+    let handler = Handler::new(config.editor, Directory::new(config.path.expand()));
 
     match self {
-      Opt::New { name } => handler.new(&name)?,
+      Opt::New { name } => handler.create(&name)?,
       Opt::Open { name } => handler.open(&name)?,
       Opt::Link { left, right } => handler.link(&left, &right)?,
       Opt::Find { tag } => handler.find(&tag)?,
       Opt::Search => handler.search()?,
+      Opt::Dir => handler.dir()?,
+      Opt::Preview { name } => handler.preview(&name)?,
     }
 
     Ok(())

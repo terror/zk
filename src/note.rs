@@ -41,16 +41,6 @@ impl From<PathBuf> for Note {
 }
 
 impl Note {
-  fn new(id: String, name: String, path: PathBuf, content: String, matter: Yaml) -> Self {
-    Self {
-      id,
-      name,
-      path,
-      content,
-      matter,
-    }
-  }
-
   /// Returns the `name` or `prefix` of a note given a filename based on
   /// a passed in `Part`.
   /// Examples:
@@ -88,21 +78,8 @@ impl Note {
     format!("{}-{}.md", now.naive_utc().timestamp().to_string(), name)
   }
 
-  /// Builds a Vec<Note> given a `path`. Each instance of a `.md` file
-  /// will be parsed and turned into a `Note`.
-  pub fn all(path: &PathBuf) -> Result<Vec<Note>, Error> {
-    let mut notes = vec![];
-
-    for entry in WalkDir::new(&path) {
-      let entry = entry.unwrap().into_path();
-      if entry.is_file() {
-        notes.push(Note::from(entry));
-      }
-    }
-
-    Ok(notes)
-  }
-
+  /// Returns the notes filename using a `.md` extension with it's `id`
+  /// and `name`.
   pub fn filename(&self) -> String {
     format!("{}-{}.md", self.id, self.name)
   }
