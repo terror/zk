@@ -1,0 +1,11 @@
+use crate::common::*;
+
+pub trait Expand {
+  fn expand(&self) -> PathBuf;
+}
+
+impl Expand for PathBuf {
+  fn expand(&self) -> PathBuf {
+    PathBuf::from(shellexpand::tilde(&self.to_str().unwrap()).to_string())
+  }
+}

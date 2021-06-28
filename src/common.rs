@@ -19,6 +19,7 @@ pub use snafu::{ResultExt, Snafu};
 pub use structopt::StructOpt;
 pub use toml;
 pub use walkdir::WalkDir;
+pub use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
 
 // modules
 pub(crate) use crate::error;
@@ -28,4 +29,6 @@ pub(crate) use crate::error;
 pub use tempfile::TempDir;
 
 // structs and enums
-pub use crate::{config::Config, error::Error, handler::Handler, note::Note, opt::Opt};
+pub use crate::{
+  config::Config, error::Error, expand::Expand, handler::Handler, note::Note, opt::Opt, part::Part,
+};
