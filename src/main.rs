@@ -16,7 +16,7 @@ mod prompt;
 
 fn main() {
   match Opt::from_args().run() {
-    Ok(()) => {}
+    Ok(()) => {},
     Err(e) => eprintln!("{}", e),
   }
 }

@@ -1,7 +1,7 @@
 use crate::common::*;
 
 pub struct Handler {
-  pub editor: String,
+  pub editor:    String,
   pub directory: Directory,
 }
 
@@ -10,8 +10,9 @@ impl Handler {
     Self { editor, directory }
   }
 
-  /// Creates a new note with the specified `name` in the Zettelkasten directory with an
-  /// appropriate prefix in addition to writing the default YAML frontmatter.
+  /// Creates a new note with the specified `name` in the Zettelkasten directory
+  /// with an appropriate prefix in addition to writing the default YAML
+  /// frontmatter.
   pub fn create(&self, name: &str) -> Result<(), Error> {
     let mut file =
       File::create(&self.directory.path.join(Note::generate_name(name))).context(error::Io)?;
@@ -42,8 +43,12 @@ impl Handler {
       }
 
       let prompt = Prompt::new(
-        format!("There exist multiple notes with the name `{}`, please choose which one you would like to open:", name),
-        candidates
+        format!(
+          "There exist multiple notes with the name `{}`, please choose which one you would like \
+           to open:",
+          name
+        ),
+        candidates,
       );
 
       // prompt the user with each candidate note
@@ -72,11 +77,8 @@ impl Handler {
   ///
   /// - Check if `left` and `right` do not already contain each other in
   /// the yaml frontmatter
-  pub fn link(&self, _left: &str, _right: &str) -> Result<(), Error> {
-    todo!()
-    // let mut left_candidates = self.directory.find(left);
-    // let mut right_candidates = self.directory.find(left);
-    // Ok(())
+  pub fn link(&self, left: &str, right: &str) -> Result<(), Error> {
+    Ok(())
   }
 
   /// Finds all notes given a `tag`. This method invoke `skim` using the
@@ -146,8 +148,8 @@ impl Handler {
 
   /// Outputs a notes contents to stdout using the `termimad` library.
   /// This is meant as an easy way to view a Zettels contents without
-  /// having to call `open`. User will be prompted interactively if multiple notes
-  /// exist with the same `name`.
+  /// having to call `open`. User will be prompted interactively if multiple
+  /// notes exist with the same `name`.
   pub fn preview(&self, name: &str) -> Result<(), Error> {
     if let Some(candidates) = self.directory.find(name) {
       // if there's only one candidate note, preview it and return
@@ -159,8 +161,12 @@ impl Handler {
       }
 
       let prompt = Prompt::new(
-        format!("There exist multiple notes with the name `{}`, please choose which one you would like to preview:", name),
-        candidates
+        format!(
+          "There exist multiple notes with the name `{}`, please choose which one you would like \
+           to preview:",
+          name
+        ),
+        candidates,
       );
 
       // prompt the user with each candidate note

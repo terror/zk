@@ -61,12 +61,11 @@ impl Note {
         if let Some(id) = split.first() {
           return Some(id);
         }
-      }
-      Part::Name => {
+      },
+      Part::Name =>
         if let Some(name) = split.first() {
           return Some(name);
-        }
-      }
+        },
     }
 
     None
