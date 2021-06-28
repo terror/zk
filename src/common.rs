@@ -1,18 +1,27 @@
 // stdlib
-pub(crate) use ::std::{
-  env, fs,
+pub use std::{
+  env,
+  fs::{self, File},
   io::{self, prelude::*},
-  path, process,
+  path::{Path, PathBuf},
+  process,
 };
 
 // dependencies
-pub(crate) use ::anyhow::Result;
-pub(crate) use ::serde::Serialize;
-pub(crate) use ::shellexpand;
-pub(crate) use ::structopt::StructOpt;
-pub(crate) use chrono::prelude::*;
-pub(crate) use toml;
+pub use chrono::prelude::*;
+pub use colored::*;
+pub use serde::{Deserialize, Serialize};
+pub use shellexpand;
+pub use snafu::{ResultExt, Snafu};
+pub use structopt::StructOpt;
+pub use toml;
 
-// dev
+// modules
+pub(crate) use crate::error;
+
+// test crates
 #[cfg(test)]
-pub(crate) use ::tempfile::TempDir;
+pub use tempfile::TempDir;
+
+// structs and enums
+pub use crate::{config::Config, error::Error, handler::Handler, opt::Opt};

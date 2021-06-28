@@ -1,42 +1,17 @@
-mod common;
-#[macro_use]
-mod utils;
-mod init;
-mod new;
-
 use crate::common::*;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "zk")]
-enum Opt {
-  #[structopt(name = "init")]
-  /// Initialize a Zettelkasten directory
-  Init { path: path::PathBuf },
+#[macro_use]
+mod test_utils;
 
-  #[structopt(name = "new")]
-  /// Create a new Zettelkasten note
-  New { name: String },
+mod common;
+mod config;
+mod error;
+mod handler;
+mod opt;
 
-  #[structopt(name = "open")]
-  /// Open an existing Zettelkasten note
-  Open { name: String },
-
-  #[structopt(name = "link")]
-  /// Link two existing Zettelkasten notes
-  Link { left: String, right: String },
-
-  #[structopt(name = "find")]
-  /// Find Zettelkasten notes by tag
-  Find { tag: String },
-}
-
-fn main() -> Result<()> {
-  match Opt::from_args() {
-    Opt::Init { path } => init::init(path)?,
-    Opt::New { name } => new::new(name)?,
-    Opt::Open { name } => println!("{}", name),
-    Opt::Link { left, right } => println!("{} <-> {}", left, right),
-    Opt::Find { tag } => println!("{}", tag),
+fn main() {
+  match Opt::from_args().run() {
+    Ok(()) => {}
+    Err(e) => eprintln!("{}", e),
   }
-  Ok(())
 }

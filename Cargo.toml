@@ -1,16 +1,22 @@
 [package]
 name    = "zk"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Liam <liam@scalzulli.com>"]
 edition = "2018"
 
 [dependencies]
-anyhow             = "1.0.38"
-chrono             = "0.4.19"
-serde              = { version = "1.0.123", features = ["derive"] }
-shellexpand        = "2.1.0"
-structopt          = "0.3"
-toml               = "0.5.8"
+chrono      = "0.4.19"
+colored     = "2.0.0"
+dirs        = "3.0.2"
+shellexpand = "2.1.0"
+snafu       = "0.6.10"
+structopt   = "0.3.0"
+toml        = "0.5.8"
+xdg         = "2.2.0"
+
+[dependencies.serde]
+version  = "1.0.0"
+features = ["derive"]
 
 [dev-dependencies]
-tempfile           = "3.2.0"
+tempfile = "3.2.0"
