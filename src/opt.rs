@@ -27,10 +27,6 @@ pub enum Opt {
   /// Zettelkasten storage location
   Dir,
 
-  #[structopt(name = "preview")]
-  /// Preview an existing Zettelkasten note in the terminal
-  Preview { name: String },
-
   #[structopt(name = "rm")]
   /// Remove an existing Zettelkasten note
   Remove { name: String },
@@ -61,7 +57,6 @@ impl Opt {
       Opt::Find { tag } => handler.find(&tag)?,
       Opt::Search => handler.search()?,
       Opt::Dir => handler.dir()?,
-      Opt::Preview { name } => handler.preview(&name)?,
       Opt::Remove { name } => handler.remove(&name)?,
       Opt::RemoveLink { left, right } => handler.remove_link(&left, &right)?,
       Opt::Tag { name, tag } => handler.tag(&name, &tag)?,

@@ -32,7 +32,7 @@ impl From<PathBuf> for Note {
     Self {
       id: NoteId {
         prefix: split.next().unwrap().to_string(),
-        name:   split.next().unwrap().to_string(),
+        name: split.next().unwrap().to_string(),
       },
       path,
       content,

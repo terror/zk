@@ -42,30 +42,19 @@ impl Handler {
         return Ok(());
       }
 
-      let prompt = Prompt::new(
-        format!(
-          "There exist multiple notes with the name `{}`, please choose which one you would like \
-           to open:",
-          name
-        ),
-        candidates
-          .iter()
-          .map(|candidate| candidate.id.to_string())
-          .collect(),
-      );
-
-      // prompt the user with each candidate note
-      if let Some(selections) = prompt.interact() {
-        for selection in selections {
-          let path = Path::join(&self.directory.path, Path::new(&selection.to_string()));
-          Command::new(&self.editor)
-            .arg(&path)
-            .status()
-            .context(error::Io)?;
+      if let Some(selected_items) = Prompt::new(candidates).interact() {
+        for item in selected_items.iter() {
+          if let Some(id) = NoteId::parse(&item.output().to_string()) {
+            let path = Path::join(&self.directory.path, Path::new(&id.to_string()));
+            Command::new(&self.editor)
+              .arg(&path)
+              .status()
+              .context(error::Io)?;
+          }
         }
-
-        return Ok(());
       }
+
+      return Ok(());
     }
 
     println!("No note with name `{}` was found.", name);
@@ -84,47 +73,12 @@ impl Handler {
   /// the yaml frontmatter
   pub fn link(&self, left: &str, right: &str) -> Result<(), Error> {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
-      let left_prompt = Prompt::new(
-        format!(
-          "There exists multiple notes with name: {}, please choose which one you would like to \
-           use:",
-          left
-        ),
-        l.iter().map(|note| note.id.to_string()).collect(),
-      );
-
-      let right_prompt = Prompt::new(
-        format!(
-          "There exists multiple notes with name: {}, please choose which one you would like to \
-           use:",
-          right
-        ),
-        r.iter().map(|note| note.id.to_string()).collect(),
-      );
+      let left_prompt = Prompt::new(l);
+      let right_prompt = Prompt::new(r);
 
       if let (Some(l), Some(r)) = (left_prompt.interact(), right_prompt.interact()) {
         let left = Note::from(self.directory.path.join(l.first().unwrap()));
-
         let right = Note::from(self.directory.path.join(r.first().unwrap()));
-
-        // At this point we have two notes that exist and need to be linked
-        // together. This requires checking and/or modifying the YAML frontmatter
-        // to ensure that the two notes here are linked.
-        //
-        // Initial approach:
-        //
-        // Rebuild the YAML links array somehow and write the frontmatter +
-        // content to each note.
-        //
-        // Some cases to think about:
-        //  - The notes are already linked (in this case, do nothing)
-        //  - Only one note links the other (in this case, add the missing
-        //  link)
-        //  - The notes aren't linked (in this case, add them both)
-        //
-        // Either way, the linking of notes will require some modification
-        // to the notes YAML frontmatter and subsequently writing it back to
-        // the file.
 
         if left.has_link(&right.id.to_string()) && right.has_link(&left.id.to_string()) {
           println!("The two notes are already linked.");
@@ -157,38 +111,15 @@ impl Handler {
   /// attempts to open each selected item.
   pub fn find(&self, tag: &str) -> Result<(), Error> {
     if let Some(candidates) = self.directory.find_by_tag(tag) {
-      let options = SkimOptionsBuilder::default()
-        .height(Some("50%"))
-        .multi(true)
-        .preview(Some(""))
-        .build()
-        .unwrap();
-
-      let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
-
-      for candidate in candidates {
-        tx.send(Arc::new(SearchItem {
-          text: candidate.id.to_string(),
-          path: candidate.path,
-        }))
-        .unwrap();
-      }
-
-      drop(tx);
-
-      let selected_items = Skim::run_with(&options, Some(rx))
-        .map(|out| out.selected_items)
-        .unwrap_or_else(Vec::new);
-
-      for item in selected_items.iter() {
-        if let Some(id) = NoteId::parse(&item.output().to_string()) {
-          self.open(&id.name)?;
+      if let Some(selected_items) = Prompt::new(candidates).interact() {
+        for item in selected_items.iter() {
+          if let Some(id) = NoteId::parse(&item.output().to_string()) {
+            self.open(&id.name)?;
+          }
         }
       }
-
       return Ok(());
     }
-
     println!("No notes exist with the tag `{}`.", tag);
     Ok(())
   }
@@ -196,83 +127,19 @@ impl Handler {
   /// Starts a fuzzy search using note id's in the Zettelkasten directory
   /// Powered by `skim` --> https://github.com/lotabout/skim
   pub fn search(&self) -> Result<(), Error> {
-    let options = SkimOptionsBuilder::default()
-      .height(Some("50%"))
-      .multi(true)
-      .preview(Some(""))
-      .build()
-      .unwrap();
-
-    let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
-
-    for note in self.directory.notes() {
-      tx.send(Arc::new(SearchItem {
-        text: note.id.to_string(),
-        path: note.path,
-      }))
-      .unwrap();
-    }
-
-    drop(tx);
-
-    let selected_items = Skim::run_with(&options, Some(rx))
-      .map(|out| out.selected_items)
-      .unwrap_or_else(Vec::new);
-
-    for item in selected_items.iter() {
-      if let Some(id) = NoteId::parse(&item.output().to_string()) {
-        self.open(&id.name)?;
+    if let Some(selected_items) = Prompt::new(self.directory.notes()).interact() {
+      for item in selected_items.iter() {
+        if let Some(id) = NoteId::parse(&item.output().to_string()) {
+          self.open(&id.name)?;
+        }
       }
     }
-
     Ok(())
   }
 
   /// Writes the current Zettelkasten storage location to stdout.
   pub fn dir(&self) -> Result<(), Error> {
     println!("{}", self.directory.path.expand().display());
-    Ok(())
-  }
-
-  /// Outputs a notes contents to stdout using the `termimad` library.
-  /// This is meant as an easy way to view a Zettels contents without
-  /// having to call `open`. User will be prompted interactively if multiple
-  /// notes exist with the same `name`.
-  pub fn preview(&self, name: &str) -> Result<(), Error> {
-    if let Some(candidates) = self.directory.find(name) {
-      // if there's only one candidate note, preview it and return
-      if candidates.len() == 1 {
-        let filename = candidates.first().unwrap().id.to_string();
-        let contents = fs::read_to_string(&self.directory.path.join(filename)).unwrap();
-        termimad::print_text(&contents);
-        return Ok(());
-      }
-
-      let prompt = Prompt::new(
-        format!(
-          "There exist multiple notes with the name `{}`, please choose which one you would like \
-           to preview:",
-          name
-        ),
-        candidates
-          .iter()
-          .map(|candidate| candidate.id.to_string())
-          .collect(),
-      );
-
-      // preview each candidate note
-      if let Some(selections) = prompt.interact() {
-        for selection in selections {
-          let path = Path::join(&self.directory.path, Path::new(&selection.to_string()));
-          let contents = fs::read_to_string(&path).unwrap();
-          termimad::print_text(&contents);
-        }
-      }
-
-      return Ok(());
-    }
-
-    println!("No note with name `{}` was found.", name);
     Ok(())
   }
 
@@ -287,17 +154,7 @@ impl Handler {
         return Ok(());
       }
 
-      let prompt = Prompt::new(
-        format!(
-          "There exist multiple notes with the name `{}`, please choose which one you would like \
-           to delete:",
-          name
-        ),
-        candidates
-          .iter()
-          .map(|candidate| candidate.id.to_string())
-          .collect(),
-      );
+      let prompt = Prompt::new(candidates);
 
       // delete each candidate note
       if let Some(selections) = prompt.interact() {
@@ -317,47 +174,12 @@ impl Handler {
   /// Removes a link between two existing notes
   pub fn remove_link(&self, left: &str, right: &str) -> Result<(), Error> {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
-      let left_prompt = Prompt::new(
-        format!(
-          "There exists multiple notes with name: {}, please choose which one you would like to \
-           use:",
-          left
-        ),
-        l.iter().map(|note| note.id.to_string()).collect(),
-      );
-
-      let right_prompt = Prompt::new(
-        format!(
-          "There exists multiple notes with name: {}, please choose which one you would like to \
-           use:",
-          right
-        ),
-        r.iter().map(|note| note.id.to_string()).collect(),
-      );
+      let left_prompt = Prompt::new(l);
+      let right_prompt = Prompt::new(r);
 
       if let (Some(l), Some(r)) = (left_prompt.interact(), right_prompt.interact()) {
         let left = Note::from(self.directory.path.join(l.first().unwrap()));
-
         let right = Note::from(self.directory.path.join(r.first().unwrap()));
-
-        // At this point we have two notes that exist and need to be linked
-        // together. This requires checking and/or modifying the YAML frontmatter
-        // to ensure that the two notes here are linked.
-        //
-        // Initial approach:
-        //
-        // Rebuild the YAML links array somehow and write the frontmatter +
-        // content to each note.
-        //
-        // Some cases to think about:
-        //  - The notes are already linked (in this case, do nothing)
-        //  - Only one note links the other (in this case, add the missing
-        //  link)
-        //  - The notes aren't linked (in this case, add them both)
-        //
-        // Either way, the linking of notes will require some modification
-        // to the notes YAML frontmatter and subsequently writing it back to
-        // the file.
 
         if !left.has_link(&right.id.to_string()) && !right.has_link(&left.id.to_string()) {
           println!("The two notes are already unlinked.");

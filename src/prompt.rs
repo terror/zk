@@ -1,38 +1,56 @@
 use crate::common::*;
 
 pub struct Prompt {
-  message: String,
-  items:   Vec<String>,
+  items: Vec<Note>,
 }
 
 impl Prompt {
-  pub fn new(message: String, items: Vec<String>) -> Self {
-    Self { message, items }
+  pub fn new(items: Vec<Note>) -> Self {
+    Self { items }
   }
 
-  /// Prompts the user with `message` using `items` as the choice list
-  /// returning either the selected items or `None`. No prompt is given
-  /// if the passed in `items` length is 1.
+  /// This method prompts the user with a `skim` fuzzy search and
+  /// returns the selected items.
   pub fn interact(&self) -> Option<Vec<String>> {
     if self.items.len() == 1 {
-      return Some(self.items.clone());
+      return Some(
+        self
+          .items
+          .iter()
+          .map(|note| note.id.to_string())
+          .collect::<Vec<String>>(),
+      );
     }
 
-    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-      .with_prompt(&self.message)
-      .items(&self.items[..])
-      .interact()
+    let options = SkimOptionsBuilder::default()
+      .height(Some("50%"))
+      .multi(true)
+      .preview(Some(""))
+      .build()
       .unwrap();
 
-    let result = selections
-      .into_iter()
-      .map(|selection| self.items[selection].clone())
-      .collect::<Vec<String>>();
+    let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
-    if result.is_empty() {
-      return None;
+    for note in &self.items {
+      tx.send(Arc::new(SearchItem {
+        text: note.id.to_string(),
+        path: note.path.clone(),
+      }))
+      .unwrap();
     }
 
-    Some(result)
+    drop(tx);
+
+    let selected_items = Skim::run_with(&options, Some(rx))
+      .map(|out| out.selected_items)
+      .unwrap_or_else(Vec::new)
+      .iter()
+      .map(|selected_item| selected_item.output().to_string())
+      .collect::<Vec<String>>();
+
+    match selected_items.len() {
+      0 => None,
+      _ => Some(selected_items),
+    }
   }
 }

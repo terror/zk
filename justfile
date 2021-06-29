@@ -13,8 +13,8 @@ fmt-check:
   cargo +nightly fmt --all -- --check
   @echo formatting check done
 
-run *args:
-	cargo run -- --{{args}}
+run subcommand *args:
+	cargo run {{subcommand}} {{args}}
 
 fmt:
 	cargo +nightly fmt
