@@ -535,6 +535,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "matter"
+version = "0.1.0-alpha4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc16e839c57e0ad77957c42d39baab3692a1c6fa47692066470cddc24a5b0cd0"
+dependencies = [
+ "lazy_static",
+ "regex",
+]
+
+[[package]]
 name = "maybe-uninit"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1492,6 +1502,7 @@ dependencies = [
  "colored",
  "dialoguer",
  "dirs 3.0.2",
+ "matter",
  "serde",
  "shellexpand",
  "skim",

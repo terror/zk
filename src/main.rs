@@ -7,11 +7,11 @@ mod common;
 mod config;
 mod directory;
 mod error;
-mod expand;
+mod expand_path;
 mod handler;
 mod note;
+mod note_id;
 mod opt;
-mod part;
 mod prompt;
 
 fn main() {

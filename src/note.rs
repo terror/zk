@@ -2,37 +2,38 @@ use crate::common::*;
 
 #[derive(Debug)]
 pub struct Note {
-  /// The notes timestamp prefix.
-  pub id: String,
-
-  /// The notes name.
-  pub name: String,
+  /// The notes timestamp prefix and name.
+  pub id: NoteId,
 
   /// Where the note is currently stored.
   pub path: PathBuf,
 
-  /// The notes content as a String.
-  pub content: String,
-
   /// Yaml frontmatter
   pub matter: Yaml,
+
+  /// The notes content as a String.
+  pub content: String,
 }
 
 /// The important thing here is to fully create a `Note` based on the
 /// filename and contents of the `.md` file.
 impl From<PathBuf> for Note {
   fn from(path: PathBuf) -> Self {
-    let filename = path.file_name().unwrap().to_str().unwrap();
+    let filename = path.file_stem().unwrap().to_str().unwrap();
 
-    let content = fs::read_to_string(&path).unwrap();
+    let mut split = filename.split('-');
 
-    let docs = YamlLoader::load_from_str(&content).unwrap();
+    let (matter, content) = matter::matter(&fs::read_to_string(&path).unwrap()).unwrap();
 
-    let matter = docs[0].clone();
+    let matter = YamlLoader::load_from_str(&matter).unwrap();
+
+    let matter = matter[0].clone();
 
     Self {
-      id: Note::retrieve(filename, Part::Id).unwrap().to_string(),
-      name: Note::retrieve(filename, Part::Name).unwrap().to_string(),
+      id: NoteId {
+        prefix: split.next().unwrap().to_string(),
+        name:   split.next().unwrap().to_string(),
+      },
       path,
       content,
       matter,
@@ -41,46 +42,27 @@ impl From<PathBuf> for Note {
 }
 
 impl Note {
-  /// Returns the `name` or `prefix` of a note given a filename based on
-  /// a passed in `Part`.
+  /// Returns the `name` and `prefix` of a note filename, aka the `NoteId`.
   /// Examples:
   /// `123-a.md` -> `a`
   /// `123-a.md` -> `123`
-  pub fn retrieve(filename: &str, part: Part) -> Option<&str> {
-    if filename == "" {
+  pub fn get_id(filename: &str) -> Option<NoteId> {
+    if filename.is_empty() {
       return None;
     }
 
     let filename = Path::new(filename).file_stem().unwrap().to_str().unwrap();
 
-    let mut split: Vec<&str> = filename.rsplitn(2, '-').collect();
+    let split: Vec<&str> = filename.rsplitn(2, '-').collect();
 
-    match part {
-      Part::Id => {
-        split.reverse();
-        if let Some(id) = split.first() {
-          return Some(id);
-        }
-      },
-      Part::Name =>
-        if let Some(name) = split.first() {
-          return Some(name);
-        },
+    if split.len() < 2 {
+      return None;
     }
 
-    None
-  }
-
-  /// Returns a new prefix (note id) concatenated with the given `name`.
-  pub fn generate_name(name: &str) -> String {
-    let now = chrono::Utc::now();
-    format!("{}-{}.md", now.naive_utc().timestamp().to_string(), name)
-  }
-
-  /// Returns the notes filename using a `.md` extension with it's `id`
-  /// and `name`.
-  pub fn filename(&self) -> String {
-    format!("{}-{}.md", self.id, self.name)
+    Some(NoteId {
+      name:   split[0].to_owned(),
+      prefix: split[1].to_owned(),
+    })
   }
 
   /// Checks if a link exists between the current note and `name`.
@@ -94,6 +76,79 @@ impl Note {
     }
     false
   }
+
+  /// Attempts to add `name` as a link to the current note.
+  pub fn add_link(&self, name: &str) -> Result<(), Error> {
+    if self.has_link(name) {
+      return Ok(());
+    }
+
+    let mut frontmatter = String::from("---\n");
+
+    if let Some(name) = self.matter["name"].as_str() {
+      frontmatter.push_str(&format!("name: {}\n", name))
+    }
+
+    if let Some(tags) = self.matter["tags"].as_vec() {
+      frontmatter.push_str("tags:\n");
+      for tag in tags {
+        frontmatter.push_str(&format!(" - {}\n", tag.as_str().unwrap()));
+      }
+    }
+
+    frontmatter.push_str("links:\n");
+
+    if let Some(links) = self.matter["links"].as_vec() {
+      for link in links {
+        frontmatter.push_str(&format!(" - {}\n", link.as_str().unwrap()));
+      }
+    }
+
+    frontmatter.push_str(&format!(" - {}\n", name));
+
+    frontmatter.push_str("---\n");
+
+    let mut file = File::create(&self.path).unwrap();
+    file.write_all(&frontmatter.as_bytes()).unwrap();
+    file.write_all(&self.content.as_bytes()).unwrap();
+
+    Ok(())
+  }
+
+  /// Attempts to add `name` as a link to the current note.
+  pub fn remove_link(&self, name: &str) -> Result<(), Error> {
+    let mut frontmatter = String::from("---\n");
+
+    if let Some(name) = self.matter["name"].as_str() {
+      frontmatter.push_str(&format!("name: {}\n", name))
+    }
+
+    if let Some(tags) = self.matter["tags"].as_vec() {
+      frontmatter.push_str("tags:\n");
+      for tag in tags {
+        frontmatter.push_str(&format!(" - {}\n", tag.as_str().unwrap()));
+      }
+    }
+
+    frontmatter.push_str("links:\n");
+
+    if let Some(links) = self.matter["links"].as_vec() {
+      for link in links {
+        if *link == Yaml::from_str(name) {
+          continue;
+        }
+        frontmatter.push_str(&format!(" - {}\n", link.as_str().unwrap()));
+      }
+    }
+
+    frontmatter.push_str("---\n");
+
+    let mut file = File::create(&self.path).unwrap();
+    file.write_all(&frontmatter.as_bytes()).unwrap();
+    file.write_all(&self.content.as_bytes()).unwrap();
+
+    Ok(())
+  }
 }
 
 #[cfg(test)]
@@ -101,18 +156,10 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_retrieve_name() {
-    assert_eq!(Note::retrieve("123-a.md", Part::Name).unwrap(), "a");
-    assert_eq!(Note::retrieve("./123-a.md", Part::Name).unwrap(), "a");
-    assert_eq!(Note::retrieve("./123--a.md", Part::Name).unwrap(), "a");
-    assert!(Note::retrieve("", Part::Name).is_none());
-  }
-
-  #[test]
-  fn test_retrieve_id() {
-    assert_eq!(Note::retrieve("123-a.md", Part::Id).unwrap(), "123");
-    assert_eq!(Note::retrieve("./123-a.md", Part::Id).unwrap(), "123");
-    assert_eq!(Note::retrieve("./123--a.md", Part::Id).unwrap(), "123-");
-    assert!(Note::retrieve("", Part::Name).is_none());
+  fn test_get_id() {
+    assert_eq!(Note::get_id("123-a.md").unwrap().name, "a");
+    assert_eq!(Note::get_id("./123-a.md").unwrap().name, "a");
+    assert_eq!(Note::get_id("./123--a.md").unwrap().name, "a");
+    assert!(Note::get_id("").is_none());
   }
 }

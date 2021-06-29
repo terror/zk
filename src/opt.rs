@@ -31,9 +31,21 @@ pub enum Opt {
   /// Preview an existing Zettelkasten note in the terminal
   Preview { name: String },
 
-  #[structopt(name = "remove")]
+  #[structopt(name = "rm")]
   /// Remove an existing Zettelkasten note
   Remove { name: String },
+
+  #[structopt(name = "rmlink")]
+  /// Remove a link between two existing Zettelkasten notes
+  RemoveLink { left: String, right: String },
+
+  #[structopt(name = "tag")]
+  /// Add a tag to an existing Zettelkasten note
+  Tag { name: String, tag: String },
+
+  #[structopt(name = "rmtag")]
+  /// Remove a tag from an existing Zettelkasten note
+  RemoveTag { name: String, tag: String },
 }
 
 impl Opt {
@@ -51,6 +63,9 @@ impl Opt {
       Opt::Dir => handler.dir()?,
       Opt::Preview { name } => handler.preview(&name)?,
       Opt::Remove { name } => handler.remove(&name)?,
+      Opt::RemoveLink { left, right } => handler.remove_link(&left, &right)?,
+      Opt::Tag { name, tag } => handler.tag(&name, &tag)?,
+      Opt::RemoveTag { name, tag } => handler.remove_tag(&name, &tag)?,
     }
 
     Ok(())
