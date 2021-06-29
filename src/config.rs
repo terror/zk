@@ -48,10 +48,6 @@ impl Config {
 mod tests {
   use super::*;
 
-  fn expand_tilde(path: &Path) -> PathBuf {
-    PathBuf::from(shellexpand::tilde(path.to_str().unwrap()).to_string())
-  }
-
   #[test]
   fn test_load_config() {
     let config = Config::load();
@@ -62,7 +58,7 @@ mod tests {
       let config = config.unwrap();
 
       assert_eq!(
-        expand_tilde(&config.path),
+        config.path.expand(),
         Path::join(&dirs::home_dir().unwrap(), ".zk")
       );
 

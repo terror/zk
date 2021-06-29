@@ -92,7 +92,7 @@ impl Note {
     Ok(())
   }
 
-  /// Attempts to add `name` as a link to the current note.
+  /// Attempts to remove `name` as a link to the current note.
   pub fn remove_link(&self, name: &str) -> Result<(), Error> {
     let mut frontmatter = String::from("---\n");
 
