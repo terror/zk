@@ -42,29 +42,6 @@ impl From<PathBuf> for Note {
 }
 
 impl Note {
-  /// Returns the `name` and `prefix` of a note filename, aka the `NoteId`.
-  /// Examples:
-  /// `123-a.md` -> `a`
-  /// `123-a.md` -> `123`
-  pub fn get_id(filename: &str) -> Option<NoteId> {
-    if filename.is_empty() {
-      return None;
-    }
-
-    let filename = Path::new(filename).file_stem().unwrap().to_str().unwrap();
-
-    let split: Vec<&str> = filename.rsplitn(2, '-').collect();
-
-    if split.len() < 2 {
-      return None;
-    }
-
-    Some(NoteId {
-      name:   split[0].to_owned(),
-      prefix: split[1].to_owned(),
-    })
-  }
-
   /// Checks if a link exists between the current note and `name`.
   pub fn has_link(&self, name: &str) -> bool {
     if let Some(links) = self.matter["links"].as_vec() {
@@ -148,18 +125,5 @@ impl Note {
     file.write_all(&self.content.as_bytes()).unwrap();
 
     Ok(())
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn test_get_id() {
-    assert_eq!(Note::get_id("123-a.md").unwrap().name, "a");
-    assert_eq!(Note::get_id("./123-a.md").unwrap().name, "a");
-    assert_eq!(Note::get_id("./123--a.md").unwrap().name, "a");
-    assert!(Note::get_id("").is_none());
   }
 }

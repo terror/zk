@@ -171,7 +171,7 @@ impl Handler {
       .unwrap_or_else(Vec::new);
 
       for item in selected_items.iter() {
-        if let Some(id) = Note::get_id(&item.output().to_string()) {
+        if let Some(id) = NoteId::parse(&item.output().to_string()) {
           self.open(&id.name)?;
         }
       }
@@ -193,7 +193,7 @@ impl Handler {
       .unwrap_or_else(Vec::new);
 
     for item in selected_items.iter() {
-      if let Some(id) = Note::get_id(&item.output().to_string()) {
+      if let Some(id) = NoteId::parse(&item.output().to_string()) {
         self.open(&id.name)?;
       }
     }
