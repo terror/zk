@@ -83,9 +83,17 @@ impl Note {
     format!("{}-{}.md", self.id, self.name)
   }
 
-  /// Writes to the notes `path` with current data on `self`. Used for
-  /// updating a notes content & frontmatter.
-  pub fn update(&self) {}
+  /// Checks if a link exists between the current note and `name`.
+  pub fn has_link(&self, name: &str) -> bool {
+    if let Some(links) = self.matter["links"].as_vec() {
+      for link in links {
+        if *link == Yaml::from_str(name) {
+          return true;
+        }
+      }
+    }
+    false
+  }
 }
 
 #[cfg(test)]

@@ -30,6 +30,10 @@ pub enum Opt {
   #[structopt(name = "preview")]
   /// Preview an existing Zettelkasten note in the terminal
   Preview { name: String },
+
+  #[structopt(name = "remove")]
+  /// Remove an existing Zettelkasten note
+  Remove { name: String },
 }
 
 impl Opt {
@@ -46,6 +50,7 @@ impl Opt {
       Opt::Search => handler.search()?,
       Opt::Dir => handler.dir()?,
       Opt::Preview { name } => handler.preview(&name)?,
+      Opt::Remove { name } => handler.remove(&name)?,
     }
 
     Ok(())

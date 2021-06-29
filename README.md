@@ -30,6 +30,7 @@ SUBCOMMANDS:
     new        Create a new Zettelkasten note
     open       Open an existing Zettelkasten note
     preview    Preview an existing Zettelkasten note in the terminal
+    remove     Remove an existing Zettelkasten note
     search     Fuzzy search Zettelkasten notes
     help       Prints this message or the help of the given subcommand(s)
 ```
