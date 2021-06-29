@@ -19,21 +19,14 @@ pub struct Note {
 /// filename and contents of the `.md` file.
 impl From<PathBuf> for Note {
   fn from(path: PathBuf) -> Self {
-    let filename = path.file_stem().unwrap().to_str().unwrap();
-
-    let mut split = filename.split('-');
+    let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
 
     let (matter, content) = matter::matter(&fs::read_to_string(&path).unwrap()).unwrap();
 
-    let matter = YamlLoader::load_from_str(&matter).unwrap();
-
-    let matter = matter[0].clone();
+    let matter = YamlLoader::load_from_str(&matter).unwrap()[0].clone();
 
     Self {
-      id: NoteId {
-        prefix: split.next().unwrap().to_string(),
-        name: split.next().unwrap().to_string(),
-      },
+      id,
       path,
       content,
       matter,
