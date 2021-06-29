@@ -28,7 +28,7 @@ impl Handler {
 
   /// Opens a note given a `name` using the editor specified in the
   /// configuration file. If there are multiple notes present with the
-  /// same `name`, the user will be prompted interactively to choose
+  /// same `name`, the user will be prompted with `skim` to choose
   /// which file(s) is/are desired to be opened.
   pub fn open(&self, name: &str) -> Result<(), Error> {
     if let Some(candidates) = self.directory.find(name) {
@@ -42,7 +42,7 @@ impl Handler {
         return Ok(());
       }
 
-      if let Some(selected_items) = Prompt::new(candidates).interact() {
+      if let Some(selected_items) = Search::new(candidates).run() {
         for item in selected_items.iter() {
           if let Some(id) = NoteId::parse(&item.output().to_string()) {
             let path = Path::join(&self.directory.path, Path::new(&id.to_string()));
@@ -73,10 +73,7 @@ impl Handler {
   /// the yaml frontmatter
   pub fn link(&self, left: &str, right: &str) -> Result<(), Error> {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
-      let left_prompt = Prompt::new(l);
-      let right_prompt = Prompt::new(r);
-
-      if let (Some(l), Some(r)) = (left_prompt.interact(), right_prompt.interact()) {
+      if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
         let left = Note::from(self.directory.path.join(l.first().unwrap()));
         let right = Note::from(self.directory.path.join(r.first().unwrap()));
 
@@ -111,7 +108,7 @@ impl Handler {
   /// attempts to open each selected item.
   pub fn find(&self, tag: &str) -> Result<(), Error> {
     if let Some(candidates) = self.directory.find_by_tag(tag) {
-      if let Some(selected_items) = Prompt::new(candidates).interact() {
+      if let Some(selected_items) = Search::new(candidates).run() {
         for item in selected_items.iter() {
           if let Some(id) = NoteId::parse(&item.output().to_string()) {
             self.open(&id.name)?;
@@ -127,7 +124,7 @@ impl Handler {
   /// Starts a fuzzy search using note id's in the Zettelkasten directory
   /// Powered by `skim` --> https://github.com/lotabout/skim
   pub fn search(&self) -> Result<(), Error> {
-    if let Some(selected_items) = Prompt::new(self.directory.notes()).interact() {
+    if let Some(selected_items) = Search::new(self.directory.notes()).run() {
       for item in selected_items.iter() {
         if let Some(id) = NoteId::parse(&item.output().to_string()) {
           self.open(&id.name)?;
@@ -154,10 +151,10 @@ impl Handler {
         return Ok(());
       }
 
-      let prompt = Prompt::new(candidates);
+      let prompt = Search::new(candidates);
 
       // delete each candidate note
-      if let Some(selections) = prompt.interact() {
+      if let Some(selections) = prompt.run() {
         for selection in selections {
           let path = Path::join(&self.directory.path, Path::new(&selection.to_string()));
           fs::remove_file(&path).unwrap();
@@ -174,10 +171,7 @@ impl Handler {
   /// Removes a link between two existing notes
   pub fn remove_link(&self, left: &str, right: &str) -> Result<(), Error> {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
-      let left_prompt = Prompt::new(l);
-      let right_prompt = Prompt::new(r);
-
-      if let (Some(l), Some(r)) = (left_prompt.interact(), right_prompt.interact()) {
+      if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
         let left = Note::from(self.directory.path.join(l.first().unwrap()));
         let right = Note::from(self.directory.path.join(r.first().unwrap()));
 

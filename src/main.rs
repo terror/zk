@@ -12,7 +12,7 @@ mod handler;
 mod note;
 mod note_id;
 mod opt;
-mod prompt;
+mod search;
 mod search_item;
 
 fn main() {

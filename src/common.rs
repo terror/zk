@@ -33,5 +33,5 @@ pub use tempfile::TempDir;
 // structs and enums
 pub use crate::{
   config::Config, directory::Directory, error::Error, expand_path::Expand, handler::Handler,
-  note::Note, note_id::NoteId, opt::Opt, prompt::Prompt, search_item::SearchItem,
+  note::Note, note_id::NoteId, opt::Opt, search::Search, search_item::SearchItem,
 };

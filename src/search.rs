@@ -1,17 +1,17 @@
 use crate::common::*;
 
-pub struct Prompt {
+pub struct Search {
   items: Vec<Note>,
 }
 
-impl Prompt {
+impl Search {
   pub fn new(items: Vec<Note>) -> Self {
     Self { items }
   }
 
-  /// This method prompts the user with a `skim` fuzzy search and
+  /// This method launches a `skim` fuzzy search with `items` and
   /// returns the selected items.
-  pub fn interact(&self) -> Option<Vec<String>> {
+  pub fn run(&self) -> Option<Vec<String>> {
     if self.items.len() == 1 {
       return Some(
         self
