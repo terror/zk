@@ -49,7 +49,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_load_config() {
+  fn test_load_default_config() {
     let config = Config::load();
 
     assert!(config.is_ok());

@@ -1,11 +1,13 @@
 // stdlib
 pub use std::{
+  borrow::Cow,
   env, fmt,
   fs::{self, File},
   io::{self, prelude::*, Cursor},
   path::{Path, PathBuf},
   process::Command,
   str,
+  sync::Arc,
 };
 
 // dependencies
@@ -33,5 +35,5 @@ pub use tempfile::TempDir;
 // structs and enums
 pub use crate::{
   config::Config, directory::Directory, error::Error, expand_path::Expand, handler::Handler,
-  note::Note, note_id::NoteId, opt::Opt, prompt::Prompt,
+  note::Note, note_id::NoteId, opt::Opt, prompt::Prompt, search_item::SearchItem,
 };

@@ -157,18 +157,28 @@ impl Handler {
   /// attempts to open each selected item.
   pub fn find(&self, tag: &str) -> Result<(), Error> {
     if let Some(candidates) = self.directory.find_by_tag(tag) {
-      let mut input = String::new();
+      let options = SkimOptionsBuilder::default()
+        .height(Some("50%"))
+        .multi(true)
+        .preview(Some(""))
+        .build()
+        .unwrap();
+
+      let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
       for candidate in candidates {
-        input.push_str(&format!("{}\n", candidate.id));
+        tx.send(Arc::new(SearchItem {
+          text: candidate.id.to_string(),
+          path: candidate.path,
+        }))
+        .unwrap();
       }
 
-      let selected_items = Skim::run_with(
-        &SkimOptions::default(),
-        Some(SkimItemReader::default().of_bufread(Cursor::new(input))),
-      )
-      .map(|out| out.selected_items)
-      .unwrap_or_else(Vec::new);
+      drop(tx);
+
+      let selected_items = Skim::run_with(&options, Some(rx))
+        .map(|out| out.selected_items)
+        .unwrap_or_else(Vec::new);
 
       for item in selected_items.iter() {
         if let Some(id) = NoteId::parse(&item.output().to_string()) {
@@ -183,12 +193,29 @@ impl Handler {
     Ok(())
   }
 
-  /// Starts a fuzzy search in the Zettelkasten directory.
+  /// Starts a fuzzy search using note id's in the Zettelkasten directory
   /// Powered by `skim` --> https://github.com/lotabout/skim
   pub fn search(&self) -> Result<(), Error> {
-    env::set_current_dir(&self.directory.path).unwrap();
+    let options = SkimOptionsBuilder::default()
+      .height(Some("50%"))
+      .multi(true)
+      .preview(Some(""))
+      .build()
+      .unwrap();
 
-    let selected_items = Skim::run_with(&SkimOptions::default(), None)
+    let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
+
+    for note in self.directory.notes() {
+      tx.send(Arc::new(SearchItem {
+        text: note.id.to_string(),
+        path: note.path,
+      }))
+      .unwrap();
+    }
+
+    drop(tx);
+
+    let selected_items = Skim::run_with(&options, Some(rx))
       .map(|out| out.selected_items)
       .unwrap_or_else(Vec::new);
 

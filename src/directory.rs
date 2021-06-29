@@ -12,7 +12,7 @@ impl Directory {
 
   /// Constructs a `Vec<Note>` based on a the directories path. This attempts to
   /// convert each instance of a markdown file into a `Note`.
-  fn notes(&self) -> Vec<Note> {
+  pub fn notes(&self) -> Vec<Note> {
     let mut notes = Vec::new();
 
     for entry in WalkDir::new(&self.path) {
