@@ -204,12 +204,15 @@ impl Handler {
       } else {
         println!(
           "{}",
-          "You must choose two notes in order to link them together.".red()
+          "You must choose two notes in order to remove a link between them.".red()
         );
         return Ok(());
       }
     } else {
-      println!("{}", "Both notes must exist in order to be linked.".red());
+      println!(
+        "{}",
+        "Both notes must exist in order for a link to be removed.".red()
+      );
       return Ok(());
     }
     Ok(())

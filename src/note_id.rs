@@ -1,6 +1,6 @@
 use crate::common::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NoteId {
   pub prefix: String,
   pub name:   String,
@@ -29,10 +29,10 @@ impl NoteId {
   /// A proper note name should be of the form
   /// `{prefix}-{name}.{extension}`.
   ///
-  /// This method cuts off anything after the first `.` when considering a
+  /// This method cuts off anything after the last `.` when considering a
   /// note id string.
   pub fn parse(note_id: &str) -> Option<Self> {
-    let mut split = note_id.split('.').next().unwrap().splitn(2, '-');
+    let mut split = note_id[..note_id.rfind('.').unwrap_or(note_id.len())].splitn(2, '-');
 
     if let (Some(prefix), Some(name)) = (split.next(), split.next()) {
       return Some(Self {
@@ -57,15 +57,27 @@ mod tests {
     assert_eq!(NoteId::parse("123-a.md").unwrap().name, "a");
     assert_eq!(NoteId::parse("abc123-").unwrap().prefix, "abc123");
     assert_eq!(NoteId::parse("abc123-").unwrap().name, "");
+    assert!(NoteId::parse("abc123").is_none());
+    assert!(NoteId::parse("").is_none());
+
     assert_eq!(
       NoteId::parse("123292-binary-search.md").unwrap().prefix,
       "123292"
     );
+
     assert_eq!(
       NoteId::parse("123292-binary-search.md").unwrap().name,
       "binary-search"
     );
-    assert!(NoteId::parse("abc123").is_none());
-    assert!(NoteId::parse("").is_none());
+
+    assert_eq!(
+      NoteId::parse("123.292-binary-search.md").unwrap().prefix,
+      "123.292"
+    );
+
+    assert_eq!(
+      NoteId::parse("123.292-binary-search.md").unwrap().name,
+      "binary-search"
+    );
   }
 }

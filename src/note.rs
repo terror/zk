@@ -1,6 +1,6 @@
 use crate::common::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Note {
   /// The notes timestamp prefix and name.
   pub id: NoteId,

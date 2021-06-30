@@ -1,11 +1,11 @@
 use crate::common::*;
 
+#[derive(Debug)]
 pub struct Directory {
   pub path: PathBuf,
 }
 
 impl Directory {
-  /// Constructor
   pub fn new(path: PathBuf) -> Self {
     Self { path }
   }
@@ -15,12 +15,13 @@ impl Directory {
   pub fn notes(&self) -> Vec<Note> {
     let mut notes = Vec::new();
 
-    for entry in WalkDir::new(&self.path) {
-      let entry = entry.unwrap().into_path();
-      if entry.is_file() && entry.extension().unwrap() == "md" {
+    WalkDir::new(&self.path)
+      .into_iter()
+      .map(|entry| entry.unwrap().into_path())
+      .filter(|entry| entry.is_file() && entry.extension().unwrap() == "md")
+      .for_each(|entry| {
         notes.push(Note::new(entry));
-      }
-    }
+      });
 
     notes
   }
@@ -30,17 +31,16 @@ impl Directory {
   /// who meet this criteria or `None`, indicating that the criteria was
   /// not met.
   pub fn find(&self, name: &str) -> Option<Vec<Note>> {
-    let mut ret = Vec::new();
-
-    for note in self.notes() {
-      if note.id.name == name {
-        ret.push(note);
-      }
-    }
+    let ret = &self
+      .notes()
+      .iter()
+      .filter(|note| note.id.name == name)
+      .map(|note| note.clone())
+      .collect::<Vec<Note>>();
 
     match ret.len() {
       0 => None,
-      _ => Some(ret),
+      _ => Some(ret.to_vec()),
     }
   }
 
@@ -49,17 +49,16 @@ impl Directory {
   /// of `Note` instances who meet this criteria or `None`, indicating
   /// that the criteria was not met.
   pub fn find_by_tag(&self, tag: &str) -> Option<Vec<Note>> {
-    let mut ret = Vec::new();
-
-    for note in self.notes() {
-      if note.matter.tags.contains(&tag.to_string()) {
-        ret.push(note);
-      }
-    }
+    let ret = &self
+      .notes()
+      .iter()
+      .filter(|note| note.matter.tags.contains(&tag.to_string()))
+      .map(|note| note.clone())
+      .collect::<Vec<Note>>();
 
     match ret.len() {
       0 => None,
-      _ => Some(ret),
+      _ => Some(ret.to_vec()),
     }
   }
 
@@ -69,17 +68,16 @@ impl Directory {
   /// that the criteria was not met.
   #[allow(dead_code)]
   pub fn find_by_link(&self, name: &str) -> Option<Vec<Note>> {
-    let mut ret = Vec::new();
-
-    for note in self.notes() {
-      if note.matter.links.contains(&name.to_string()) {
-        ret.push(note);
-      }
-    }
+    let ret = &self
+      .notes()
+      .iter()
+      .filter(|note| note.matter.links.contains(&name.to_string()))
+      .map(|note| note.clone())
+      .collect::<Vec<Note>>();
 
     match ret.len() {
       0 => None,
-      _ => Some(ret),
+      _ => Some(ret.to_vec()),
     }
   }
 }
