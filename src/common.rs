@@ -12,7 +12,7 @@ pub use std::{
 
 // dependencies
 pub use chrono::prelude::*;
-pub use colored::*;
+pub use colored::{Colorize, *};
 pub use matter;
 pub use serde::{Deserialize, Serialize};
 pub use shellexpand;

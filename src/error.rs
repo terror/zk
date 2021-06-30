@@ -23,12 +23,6 @@ pub enum Error {
     var:    String,
   },
 
-  #[snafu(display("Failed to parse frontmatter for note with name: {}", name))]
-  FrontmatterError {
-    source: yaml_rust::ScanError,
-    name:   String,
-  },
-
   Io {
     source: io::Error,
   },

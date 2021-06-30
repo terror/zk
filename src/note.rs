@@ -54,6 +54,14 @@ impl Note {
   /// Attempts to add `name` as a link to the current note.
   pub fn add_link(&self, name: &str) -> Result<(), Error> {
     if self.has_link(name) {
+      println!(
+        "{}",
+        format!(
+          "Note `{}` already contains a link to `{}`",
+          self.id.name, name
+        )
+        .red()
+      );
       return Ok(());
     }
 
@@ -81,6 +89,14 @@ impl Note {
   /// Attempts to remove `name` as a link from the current note.
   pub fn remove_link(&self, name: &str) -> Result<(), Error> {
     if !self.has_link(name) {
+      println!(
+        "{}",
+        format!(
+          "Note `{}` already does not contain a link to `{}`",
+          self.id.name, name
+        )
+        .red()
+      );
       return Ok(());
     }
 
@@ -109,6 +125,14 @@ impl Note {
   /// Attempts to add `name` as a tag to the current note.
   pub fn add_tag(&self, name: &str) -> Result<(), Error> {
     if self.has_tag(name) {
+      println!(
+        "{}",
+        format!(
+          "Note `{}` already contains the tag `{}`",
+          self.id.name, name
+        )
+        .red()
+      );
       return Ok(());
     }
 
@@ -136,6 +160,14 @@ impl Note {
   /// Attempts to remove `name` as a tag from the current note.
   pub fn remove_tag(&self, name: &str) -> Result<(), Error> {
     if !self.has_tag(name) {
+      println!(
+        "{}",
+        format!(
+          "Note `{}` already does not contain the tag `{}`",
+          self.id.name, name
+        )
+        .red()
+      );
       return Ok(());
     }
 

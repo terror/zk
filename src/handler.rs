@@ -14,12 +14,18 @@ impl Handler {
   /// with an appropriate prefix in addition to writing the default YAML
   /// frontmatter.
   pub fn create(&self, name: &str) -> Result<(), Error> {
-    let mut file =
-      File::create(&self.directory.path.join(NoteId::new(name).to_string())).context(error::Io)?;
+    let id = NoteId::new(name);
+
+    let mut file = File::create(&self.directory.path.join(id.to_string())).context(error::Io)?;
 
     file
       .write_all(format!("---\nname: {}\n---\n", name).as_bytes())
       .context(error::Io)?;
+
+    println!(
+      "{}",
+      format!("Success! Note with filename `{}` created.", id).green()
+    );
 
     self.open(name)?;
 
@@ -57,7 +63,11 @@ impl Handler {
       return Ok(());
     }
 
-    println!("No note with name `{}` was found.", name);
+    println!(
+      "{}",
+      format!("No note with name `{}` was found.", name).red()
+    );
+
     Ok(())
   }
 
@@ -75,28 +85,23 @@ impl Handler {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
       if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
         let left = Note::new(self.directory.path.join(l.first().unwrap()));
+
         let right = Note::new(self.directory.path.join(r.first().unwrap()));
 
-        if left.has_link(&right.id.to_string()) && right.has_link(&left.id.to_string()) {
-          println!("The two notes are already linked.");
-          return Ok(());
-        }
+        left.add_link(&right.id.to_string())?;
 
-        if !left.has_link(&right.id.to_string()) {
-          left.add_link(&right.id.to_string())?;
-        }
-
-        if !right.has_link(&left.id.to_string()) {
-          right.add_link(&left.id.to_string())?;
-        }
+        right.add_link(&left.id.to_string())?;
 
         println!("{} <-> {}", left.id, right.id);
       } else {
-        println!("You must choose two notes in order to link them together.");
+        println!(
+          "{}",
+          "You must choose two notes in order to link them together.".red()
+        );
         return Ok(());
       }
     } else {
-      println!("Both notes must exist in order to be linked.");
+      println!("{}", "Both notes must exist in order to be linked.".red());
       return Ok(());
     }
 
@@ -120,7 +125,12 @@ impl Handler {
       }
       return Ok(());
     }
-    println!("No notes exist with the tag `{}`.", tag);
+
+    println!(
+      "{}",
+      format!("No notes exist with the tag `{}`.", tag).red()
+    );
+
     Ok(())
   }
 
@@ -170,7 +180,11 @@ impl Handler {
       return Ok(());
     }
 
-    println!("No note with name `{}` was found.", name);
+    println!(
+      "{}",
+      format!("No note with name `{}` was found.", name).red()
+    );
+
     Ok(())
   }
 
@@ -179,28 +193,23 @@ impl Handler {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
       if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
         let left = Note::new(self.directory.path.join(l.first().unwrap()));
+
         let right = Note::new(self.directory.path.join(r.first().unwrap()));
 
-        if !left.has_link(&right.id.to_string()) && !right.has_link(&left.id.to_string()) {
-          println!("The two notes are already unlinked.");
-          return Ok(());
-        }
+        left.remove_link(&right.id.to_string())?;
 
-        if left.has_link(&right.id.to_string()) {
-          left.remove_link(&right.id.to_string())?;
-        }
-
-        if right.has_link(&left.id.to_string()) {
-          right.remove_link(&left.id.to_string())?;
-        }
+        right.remove_link(&left.id.to_string())?;
 
         println!("{} <-X-> {}", left.id, right.id);
       } else {
-        println!("You must choose two notes in order to link them together.");
+        println!(
+          "{}",
+          "You must choose two notes in order to link them together.".red()
+        );
         return Ok(());
       }
     } else {
-      println!("Both notes must exist in order to be linked.");
+      println!("{}", "Both notes must exist in order to be linked.".red());
       return Ok(());
     }
     Ok(())
@@ -228,7 +237,11 @@ impl Handler {
       return Ok(());
     }
 
-    println!("No note with name `{}` was found.", name);
+    println!(
+      "{}",
+      format!("No note with name `{}` was found.", name).red()
+    );
+
     Ok(())
   }
 
@@ -254,7 +267,11 @@ impl Handler {
       return Ok(());
     }
 
-    println!("No note with name `{}` was found.", name);
+    println!(
+      "{}",
+      format!("No note with name `{}` was found.", name).red()
+    );
+
     Ok(())
   }
 }
