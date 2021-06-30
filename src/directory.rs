@@ -52,10 +52,8 @@ impl Directory {
     let mut ret = Vec::new();
 
     for note in self.notes() {
-      if let Some(tags) = &note.matter.tags {
-        if tags.contains(&tag.to_string()) {
-          ret.push(note);
-        }
+      if note.matter.tags.contains(&tag.to_string()) {
+        ret.push(note);
       }
     }
 
@@ -74,10 +72,8 @@ impl Directory {
     let mut ret = Vec::new();
 
     for note in self.notes() {
-      if let Some(links) = &note.matter.links {
-        if links.contains(&name.to_string()) {
-          ret.push(note);
-        }
+      if note.matter.links.contains(&name.to_string()) {
+        ret.push(note);
       }
     }
 

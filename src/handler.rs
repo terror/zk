@@ -92,7 +92,7 @@ impl Handler {
 
         right.add_link(&left.id.to_string())?;
 
-        println!("{} <-> {}", left.id, right.id);
+        println!("{}", format!("{} <-> {}", left.id, right.id).green());
       } else {
         println!(
           "{}",
@@ -200,7 +200,7 @@ impl Handler {
 
         right.remove_link(&left.id.to_string())?;
 
-        println!("{} <-X-> {}", left.id, right.id);
+        println!("{}", format!("{} <-X-> {}", left.id, right.id).green());
       } else {
         println!(
           "{}",

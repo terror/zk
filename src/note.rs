@@ -33,20 +33,16 @@ impl Note {
 
   /// Checks if a link exists between the current note and `name`.
   pub fn has_link(&self, name: &str) -> bool {
-    if let Some(links) = &self.matter.links {
-      if links.contains(&name.to_owned()) {
-        return true;
-      }
+    if self.matter.links.contains(&name.to_owned()) {
+      return true;
     }
     false
   }
 
   /// Checks if a tag `name` exists within this notes tags.
   pub fn has_tag(&self, name: &str) -> bool {
-    if let Some(tags) = &self.matter.tags {
-      if tags.contains(&name.to_owned()) {
-        return true;
-      }
+    if self.matter.tags.contains(&name.to_owned()) {
+      return true;
     }
     false
   }
@@ -57,7 +53,7 @@ impl Note {
       println!(
         "{}",
         format!(
-          "Note `{}` already contains a link to `{}`",
+          "Note: `{}` already contains a link to `{}`",
           self.id.name, name
         )
         .red()
@@ -67,10 +63,8 @@ impl Note {
 
     let mut new = Vec::new();
 
-    if let Some(links) = &self.matter.links {
-      for link in links {
-        new.push(link.to_string());
-      }
+    for link in &self.matter.links {
+      new.push(link.to_string());
     }
 
     new.push(name.to_string());
@@ -78,7 +72,7 @@ impl Note {
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &Some(new)).as_bytes())
+      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &new).as_bytes())
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
@@ -92,7 +86,7 @@ impl Note {
       println!(
         "{}",
         format!(
-          "Note `{}` already does not contain a link to `{}`",
+          "Note: `{}` already does not contain a link to `{}`",
           self.id.name, name
         )
         .red()
@@ -102,19 +96,17 @@ impl Note {
 
     let mut new = Vec::new();
 
-    if let Some(links) = &self.matter.links {
-      for link in links {
-        if link == name {
-          continue;
-        }
-        new.push(link.to_string());
+    for link in &self.matter.links {
+      if link == name {
+        continue;
       }
+      new.push(link.to_string());
     }
 
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &Some(new)).as_bytes())
+      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &new).as_bytes())
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
@@ -138,10 +130,8 @@ impl Note {
 
     let mut new = Vec::new();
 
-    if let Some(tags) = &self.matter.tags {
-      for tag in tags {
-        new.push(tag.to_string());
-      }
+    for tag in &self.matter.tags {
+      new.push(tag.to_string());
     }
 
     new.push(name.to_string());
@@ -149,7 +139,7 @@ impl Note {
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &Some(new), &self.matter.links).as_bytes())
+      .write_all(&Matter::build(&self.matter.name, &new, &self.matter.links).as_bytes())
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
@@ -163,7 +153,7 @@ impl Note {
       println!(
         "{}",
         format!(
-          "Note `{}` already does not contain the tag `{}`",
+          "Note: `{}` already does not contain the tag `{}`",
           self.id.name, name
         )
         .red()
@@ -173,19 +163,17 @@ impl Note {
 
     let mut new = Vec::new();
 
-    if let Some(tags) = &self.matter.tags {
-      for tag in tags {
-        if tag == name {
-          continue;
-        }
-        new.push(tag.to_string());
+    for tag in &self.matter.tags {
+      if tag == name {
+        continue;
       }
+      new.push(tag.to_string());
     }
 
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &Some(new)).as_bytes())
+      .write_all(&Matter::build(&self.matter.name, &new, &self.matter.links).as_bytes())
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();

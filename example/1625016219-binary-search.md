@@ -5,6 +5,7 @@ tags:
  - software
 links:
  - 1625016407-two-sum.md
+ - 1625018068-xd.md
 ---
 This search algorithm can search a sorted array in O(n)!
 
