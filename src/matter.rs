@@ -1,16 +1,10 @@
 use crate::common::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Matter {
   pub name:  String,
   pub tags:  Vec<String>,
   pub links: Vec<String>,
-}
-
-impl fmt::Display for Matter {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{}", Matter::build(&self.name, &self.tags, &self.links))
-  }
 }
 
 /// Attempts to turn the str `content` into `Matter` struct with the
@@ -40,25 +34,25 @@ impl From<&str> for Matter {
 }
 
 impl Matter {
-  pub fn build(name: &String, tags: &Vec<String>, links: &Vec<String>) -> String {
+  pub fn to_string(matter: Matter) -> String {
     let mut result = String::from("---\n");
 
-    if !name.is_empty() {
-      result.push_str(&format!("name: {}\n", name))
+    if !matter.name.is_empty() {
+      result.push_str(&format!("name: {}\n", matter.name))
     }
 
-    if !tags.is_empty() {
+    if !matter.tags.is_empty() {
       result.push_str("tags:\n");
-      for tag in tags {
+      matter.tags.iter().for_each(|tag| {
         result.push_str(&format!(" - {}\n", tag));
-      }
+      });
     }
 
-    if !links.is_empty() {
+    if !matter.links.is_empty() {
       result.push_str("links:\n");
-      for link in links {
+      matter.links.iter().for_each(|link| {
         result.push_str(&format!(" - {}\n", link));
-      }
+      });
     }
 
     result.push_str("---\n");

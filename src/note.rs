@@ -61,18 +61,25 @@ impl Note {
       return Ok(());
     }
 
-    let mut new = Vec::new();
-
-    for link in &self.matter.links {
-      new.push(link.to_string());
-    }
+    let mut new = self
+      .matter
+      .links
+      .iter()
+      .map(|link| link.to_owned())
+      .collect::<Vec<String>>();
 
     new.push(name.to_string());
 
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &new).as_bytes())
+      .write_all(
+        &Matter::to_string(Matter {
+          links: new,
+          ..self.matter.clone()
+        })
+        .as_bytes(),
+      )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
@@ -94,19 +101,24 @@ impl Note {
       return Ok(());
     }
 
-    let mut new = Vec::new();
-
-    for link in &self.matter.links {
-      if link == name {
-        continue;
-      }
-      new.push(link.to_string());
-    }
+    let new = self
+      .matter
+      .links
+      .iter()
+      .filter(|link| *link != name)
+      .map(|link| link.to_owned())
+      .collect::<Vec<String>>();
 
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &new).as_bytes())
+      .write_all(
+        &Matter::to_string(Matter {
+          links: new,
+          ..self.matter.clone()
+        })
+        .as_bytes(),
+      )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
@@ -128,18 +140,25 @@ impl Note {
       return Ok(());
     }
 
-    let mut new = Vec::new();
-
-    for tag in &self.matter.tags {
-      new.push(tag.to_string());
-    }
+    let mut new = self
+      .matter
+      .tags
+      .iter()
+      .map(|tag| tag.to_owned())
+      .collect::<Vec<String>>();
 
     new.push(name.to_string());
 
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &new, &self.matter.links).as_bytes())
+      .write_all(
+        &Matter::to_string(Matter {
+          tags: new,
+          ..self.matter.clone()
+        })
+        .as_bytes(),
+      )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
@@ -161,19 +180,24 @@ impl Note {
       return Ok(());
     }
 
-    let mut new = Vec::new();
-
-    for tag in &self.matter.tags {
-      if tag == name {
-        continue;
-      }
-      new.push(tag.to_string());
-    }
+    let new = self
+      .matter
+      .tags
+      .iter()
+      .filter(|tag| *tag != name)
+      .map(|tag| tag.to_owned())
+      .collect::<Vec<String>>();
 
     let mut file = File::create(&self.path).unwrap();
 
     file
-      .write_all(&Matter::build(&self.matter.name, &new, &self.matter.links).as_bytes())
+      .write_all(
+        &Matter::to_string(Matter {
+          tags: new,
+          ..self.matter.clone()
+        })
+        .as_bytes(),
+      )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
