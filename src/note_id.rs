@@ -32,7 +32,7 @@ impl NoteId {
   /// This method cuts off anything after the first `.` when considering a
   /// note id string.
   pub fn parse(note_id: &str) -> Option<Self> {
-    let mut split = note_id.split('.').next().unwrap().split('-');
+    let mut split = note_id.split('.').next().unwrap().splitn(2, '-');
 
     if let (Some(prefix), Some(name)) = (split.next(), split.next()) {
       return Some(Self {
@@ -57,6 +57,14 @@ mod tests {
     assert_eq!(NoteId::parse("123-a.md").unwrap().name, "a");
     assert_eq!(NoteId::parse("abc123-").unwrap().prefix, "abc123");
     assert_eq!(NoteId::parse("abc123-").unwrap().name, "");
+    assert_eq!(
+      NoteId::parse("123292-binary-search.md").unwrap().prefix,
+      "123292"
+    );
+    assert_eq!(
+      NoteId::parse("123292-binary-search.md").unwrap().name,
+      "binary-search"
+    );
     assert!(NoteId::parse("abc123").is_none());
     assert!(NoteId::parse("").is_none());
   }

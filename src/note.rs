@@ -8,22 +8,20 @@ pub struct Note {
   /// Where the note is currently stored.
   pub path: PathBuf,
 
-  /// Yaml frontmatter
-  pub matter: Yaml,
+  /// Yaml frontmatter.
+  pub matter: Matter,
 
   /// The notes content as a String.
   pub content: String,
 }
 
-/// The important thing here is to fully create a `Note` based on the
-/// filename and contents of the `.md` file.
-impl From<PathBuf> for Note {
-  fn from(path: PathBuf) -> Self {
+impl Note {
+  pub fn new(path: PathBuf) -> Self {
     let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
 
     let (matter, content) = matter::matter(&fs::read_to_string(&path).unwrap()).unwrap();
 
-    let matter = YamlLoader::load_from_str(&matter).unwrap()[0].clone();
+    let matter = Matter::from(matter.as_str());
 
     Self {
       id,
@@ -32,16 +30,22 @@ impl From<PathBuf> for Note {
       matter,
     }
   }
-}
 
-impl Note {
   /// Checks if a link exists between the current note and `name`.
   pub fn has_link(&self, name: &str) -> bool {
-    if let Some(links) = self.matter["links"].as_vec() {
-      for link in links {
-        if *link == Yaml::from_str(name) {
-          return true;
-        }
+    if let Some(links) = &self.matter.links {
+      if links.contains(&name.to_owned()) {
+        return true;
+      }
+    }
+    false
+  }
+
+  /// Checks if a tag `name` exists within this notes tags.
+  pub fn has_tag(&self, name: &str) -> bool {
+    if let Some(tags) = &self.matter.tags {
+      if tags.contains(&name.to_owned()) {
+        return true;
       }
     }
     false
@@ -53,68 +57,105 @@ impl Note {
       return Ok(());
     }
 
-    let mut frontmatter = String::from("---\n");
+    let mut new = Vec::new();
 
-    if let Some(name) = self.matter["name"].as_str() {
-      frontmatter.push_str(&format!("name: {}\n", name))
-    }
-
-    if let Some(tags) = self.matter["tags"].as_vec() {
-      frontmatter.push_str("tags:\n");
-      for tag in tags {
-        frontmatter.push_str(&format!(" - {}\n", tag.as_str().unwrap()));
-      }
-    }
-
-    frontmatter.push_str("links:\n");
-
-    if let Some(links) = self.matter["links"].as_vec() {
+    if let Some(links) = &self.matter.links {
       for link in links {
-        frontmatter.push_str(&format!(" - {}\n", link.as_str().unwrap()));
+        new.push(link.to_string());
       }
     }
 
-    frontmatter.push_str(&format!(" - {}\n", name));
-
-    frontmatter.push_str("---\n");
+    new.push(name.to_string());
 
     let mut file = File::create(&self.path).unwrap();
-    file.write_all(&frontmatter.as_bytes()).unwrap();
+
+    file
+      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &Some(new)).as_bytes())
+      .unwrap();
+
     file.write_all(&self.content.as_bytes()).unwrap();
 
     Ok(())
   }
 
-  /// Attempts to remove `name` as a link to the current note.
+  /// Attempts to remove `name` as a link from the current note.
   pub fn remove_link(&self, name: &str) -> Result<(), Error> {
-    let mut frontmatter = String::from("---\n");
-
-    if let Some(name) = self.matter["name"].as_str() {
-      frontmatter.push_str(&format!("name: {}\n", name))
+    if !self.has_link(name) {
+      return Ok(());
     }
 
-    if let Some(tags) = self.matter["tags"].as_vec() {
-      frontmatter.push_str("tags:\n");
-      for tag in tags {
-        frontmatter.push_str(&format!(" - {}\n", tag.as_str().unwrap()));
-      }
-    }
+    let mut new = Vec::new();
 
-    frontmatter.push_str("links:\n");
-
-    if let Some(links) = self.matter["links"].as_vec() {
+    if let Some(links) = &self.matter.links {
       for link in links {
-        if *link == Yaml::from_str(name) {
+        if link == name {
           continue;
         }
-        frontmatter.push_str(&format!(" - {}\n", link.as_str().unwrap()));
+        new.push(link.to_string());
       }
     }
 
-    frontmatter.push_str("---\n");
+    let mut file = File::create(&self.path).unwrap();
+
+    file
+      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &Some(new)).as_bytes())
+      .unwrap();
+
+    file.write_all(&self.content.as_bytes()).unwrap();
+
+    Ok(())
+  }
+
+  /// Attempts to add `name` as a tag to the current note.
+  pub fn add_tag(&self, name: &str) -> Result<(), Error> {
+    if self.has_tag(name) {
+      return Ok(());
+    }
+
+    let mut new = Vec::new();
+
+    if let Some(tags) = &self.matter.tags {
+      for tag in tags {
+        new.push(tag.to_string());
+      }
+    }
+
+    new.push(name.to_string());
 
     let mut file = File::create(&self.path).unwrap();
-    file.write_all(&frontmatter.as_bytes()).unwrap();
+
+    file
+      .write_all(&Matter::build(&self.matter.name, &Some(new), &self.matter.links).as_bytes())
+      .unwrap();
+
+    file.write_all(&self.content.as_bytes()).unwrap();
+
+    Ok(())
+  }
+
+  /// Attempts to remove `name` as a tag from the current note.
+  pub fn remove_tag(&self, name: &str) -> Result<(), Error> {
+    if !self.has_tag(name) {
+      return Ok(());
+    }
+
+    let mut new = Vec::new();
+
+    if let Some(tags) = &self.matter.tags {
+      for tag in tags {
+        if tag == name {
+          continue;
+        }
+        new.push(tag.to_string());
+      }
+    }
+
+    let mut file = File::create(&self.path).unwrap();
+
+    file
+      .write_all(&Matter::build(&self.matter.name, &self.matter.tags, &Some(new)).as_bytes())
+      .unwrap();
+
     file.write_all(&self.content.as_bytes()).unwrap();
 
     Ok(())

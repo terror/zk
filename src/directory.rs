@@ -18,7 +18,7 @@ impl Directory {
     for entry in WalkDir::new(&self.path) {
       let entry = entry.unwrap().into_path();
       if entry.is_file() && entry.extension().unwrap() == "md" {
-        notes.push(Note::from(entry));
+        notes.push(Note::new(entry));
       }
     }
 
@@ -52,8 +52,8 @@ impl Directory {
     let mut ret = Vec::new();
 
     for note in self.notes() {
-      if let Some(tags) = note.matter["tags"].as_vec() {
-        if tags.contains(&Yaml::from_str(tag)) {
+      if let Some(tags) = &note.matter.tags {
+        if tags.contains(&tag.to_string()) {
           ret.push(note);
         }
       }
@@ -74,8 +74,8 @@ impl Directory {
     let mut ret = Vec::new();
 
     for note in self.notes() {
-      if let Some(links) = note.matter["links"].as_vec() {
-        if links.contains(&Yaml::from_str(name)) {
+      if let Some(links) = &note.matter.links {
+        if links.contains(&name.to_string()) {
           ret.push(note);
         }
       }

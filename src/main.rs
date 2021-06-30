@@ -9,6 +9,7 @@ mod directory;
 mod error;
 mod expand_path;
 mod handler;
+mod matter;
 mod note;
 mod note_id;
 mod opt;

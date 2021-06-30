@@ -74,8 +74,8 @@ impl Handler {
   pub fn link(&self, left: &str, right: &str) -> Result<(), Error> {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
       if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
-        let left = Note::from(self.directory.path.join(l.first().unwrap()));
-        let right = Note::from(self.directory.path.join(r.first().unwrap()));
+        let left = Note::new(self.directory.path.join(l.first().unwrap()));
+        let right = Note::new(self.directory.path.join(r.first().unwrap()));
 
         if left.has_link(&right.id.to_string()) && right.has_link(&left.id.to_string()) {
           println!("The two notes are already linked.");
@@ -111,7 +111,10 @@ impl Handler {
       if let Some(selected_items) = Search::new(candidates).run() {
         for item in selected_items.iter() {
           if let Some(id) = NoteId::parse(&item.output().to_string()) {
-            self.open(&id.name)?;
+            Command::new(&self.editor)
+              .arg(&self.directory.path.join(id.to_string()))
+              .status()
+              .context(error::Io)?;
           }
         }
       }
@@ -127,7 +130,10 @@ impl Handler {
     if let Some(selected_items) = Search::new(self.directory.notes()).run() {
       for item in selected_items.iter() {
         if let Some(id) = NoteId::parse(&item.output().to_string()) {
-          self.open(&id.name)?;
+          Command::new(&self.editor)
+            .arg(&self.directory.path.join(id.to_string()))
+            .status()
+            .context(error::Io)?;
         }
       }
     }
@@ -172,8 +178,8 @@ impl Handler {
   pub fn remove_link(&self, left: &str, right: &str) -> Result<(), Error> {
     if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
       if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
-        let left = Note::from(self.directory.path.join(l.first().unwrap()));
-        let right = Note::from(self.directory.path.join(r.first().unwrap()));
+        let left = Note::new(self.directory.path.join(l.first().unwrap()));
+        let right = Note::new(self.directory.path.join(r.first().unwrap()));
 
         if !left.has_link(&right.id.to_string()) && !right.has_link(&left.id.to_string()) {
           println!("The two notes are already unlinked.");
@@ -200,11 +206,55 @@ impl Handler {
     Ok(())
   }
 
-  pub fn tag(&self, _name: &str, _tag: &str) -> Result<(), Error> {
+  pub fn tag(&self, name: &str, tag: &str) -> Result<(), Error> {
+    if let Some(candidates) = self.directory.find(name) {
+      // if there's only one candidate note, tag it and return
+      if candidates.len() == 1 {
+        let candidate = candidates.first().unwrap();
+        candidate.add_tag(tag)?;
+        return Ok(());
+      }
+
+      if let Some(selected_items) = Search::new(candidates).run() {
+        for item in selected_items.iter() {
+          if let Some(id) = NoteId::parse(&item.output().to_string()) {
+            let path = Path::join(&self.directory.path, Path::new(&id.to_string()));
+            let note = Note::new(path.to_owned());
+            note.add_tag(tag)?;
+          }
+        }
+      }
+
+      return Ok(());
+    }
+
+    println!("No note with name `{}` was found.", name);
     Ok(())
   }
 
-  pub fn remove_tag(&self, _name: &str, _tag: &str) -> Result<(), Error> {
+  pub fn remove_tag(&self, name: &str, tag: &str) -> Result<(), Error> {
+    if let Some(candidates) = self.directory.find(name) {
+      // if there's only one candidate note, tag it and return
+      if candidates.len() == 1 {
+        let candidate = candidates.first().unwrap();
+        candidate.remove_tag(tag)?;
+        return Ok(());
+      }
+
+      if let Some(selected_items) = Search::new(candidates).run() {
+        for item in selected_items.iter() {
+          if let Some(id) = NoteId::parse(&item.output().to_string()) {
+            let path = Path::join(&self.directory.path, Path::new(&id.to_string()));
+            let note = Note::new(path.to_owned());
+            note.remove_tag(tag)?;
+          }
+        }
+      }
+
+      return Ok(());
+    }
+
+    println!("No note with name `{}` was found.", name);
     Ok(())
   }
 }
