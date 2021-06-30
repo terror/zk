@@ -4,43 +4,43 @@ use crate::common::*;
 #[structopt(name = "zk")]
 pub enum Opt {
   #[structopt(name = "new")]
-  /// Create a new Zettelkasten note
+  /// Create a new note
   New { name: String },
 
   #[structopt(name = "open")]
-  /// Open an existing Zettelkasten note
+  /// Open a note
   Open { name: String },
 
   #[structopt(name = "link")]
-  /// Link two existing Zettelkasten notes
+  /// Link two notes
   Link { left: String, right: String },
 
   #[structopt(name = "find")]
-  /// Find Zettelkasten notes by tag
+  /// Find notes by tag
   Find { tag: String },
 
   #[structopt(name = "search")]
-  /// Fuzzy search Zettelkasten notes
+  /// Fuzzy search notes
   Search,
 
   #[structopt(name = "dir")]
-  /// Zettelkasten storage location
+  /// Output the Zettelkasten directory path
   Dir,
 
   #[structopt(name = "rm")]
-  /// Remove an existing Zettelkasten note
+  /// Remove a note
   Remove { name: String },
 
   #[structopt(name = "rmlink")]
-  /// Remove a link between two existing Zettelkasten notes
+  /// Remove a link between two notes
   RemoveLink { left: String, right: String },
 
   #[structopt(name = "tag")]
-  /// Add a tag to an existing Zettelkasten note
+  /// Add a tag to a note
   Tag { name: String, tag: String },
 
   #[structopt(name = "rmtag")]
-  /// Remove a tag from an existing Zettelkasten note
+  /// Remove a tag from a note
   RemoveTag { name: String, tag: String },
 }
 
@@ -48,7 +48,10 @@ impl Opt {
   pub fn run(self) -> Result<(), Error> {
     let config = Config::load()?;
 
-    let handler = Handler::new(config.editor, Directory::new(config.path.expand()));
+    let handler = Handler::new(
+      config.clone(),
+      Directory::new(config.path.expand(), config.ext),
+    );
 
     match self {
       Opt::New { name } => handler.create(&name)?,

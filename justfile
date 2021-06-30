@@ -1,3 +1,6 @@
+default:
+	just --list
+
 ci: build test clippy fmt-check
 
 build:
@@ -20,7 +23,7 @@ fmt:
 	cargo +nightly fmt
 
 check:
- cargo check
+	cargo check --all-features --all-targets
 
 watch +COMMAND='test':
 	cargo watch --clear --exec "{{COMMAND}}"

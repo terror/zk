@@ -1,0 +1,10 @@
+# The Zettelkasten storage location.
+# path = '~/.zk'
+
+# The preferred editor of choice when opening
+# and editing notes.
+# editor = 'nvim'
+
+# The file extension for files that reside within the
+# Zettelkasten directory.
+# ext = 'md'

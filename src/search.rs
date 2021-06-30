@@ -11,9 +11,9 @@ impl Search {
 
   /// This method launches a `skim` fuzzy search with `items` and
   /// returns the selected items.
-  pub fn run(&self) -> Option<Vec<String>> {
+  pub fn run(&self) -> Result<Vec<String>, Error> {
     if self.items.len() == 1 {
-      return Some(
+      return Ok(
         self
           .items
           .iter()
@@ -23,9 +23,9 @@ impl Search {
     }
 
     let options = SkimOptionsBuilder::default()
-      .height(Some("50%"))
-      .multi(true)
+      .height(Some("100%"))
       .preview(Some(""))
+      .multi(true)
       .build()
       .unwrap();
 
@@ -49,8 +49,8 @@ impl Search {
       .collect::<Vec<String>>();
 
     match selected_items.len() {
-      0 => None,
-      _ => Some(selected_items),
+      0 => Err(error::Error::NoteNotSelected),
+      _ => Ok(selected_items),
     }
   }
 }

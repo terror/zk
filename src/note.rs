@@ -26,8 +26,8 @@ impl Note {
     Self {
       id,
       path,
-      content,
       matter,
+      content,
     }
   }
 
@@ -74,7 +74,7 @@ impl Note {
 
     file
       .write_all(
-        &Matter::to_string(Matter {
+        &Matter::into_string(Matter {
           links: new,
           ..self.matter.clone()
         })
@@ -113,7 +113,7 @@ impl Note {
 
     file
       .write_all(
-        &Matter::to_string(Matter {
+        &Matter::into_string(Matter {
           links: new,
           ..self.matter.clone()
         })
@@ -153,7 +153,7 @@ impl Note {
 
     file
       .write_all(
-        &Matter::to_string(Matter {
+        &Matter::into_string(Matter {
           tags: new,
           ..self.matter.clone()
         })
@@ -192,7 +192,7 @@ impl Note {
 
     file
       .write_all(
-        &Matter::to_string(Matter {
+        &Matter::into_string(Matter {
           tags: new,
           ..self.matter.clone()
         })

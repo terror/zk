@@ -1,13 +1,14 @@
 use crate::common::*;
 
+#[derive(Debug)]
 pub struct Handler {
-  pub editor:    String,
+  pub config:    Config,
   pub directory: Directory,
 }
 
 impl Handler {
-  pub fn new(editor: String, directory: Directory) -> Self {
-    Self { editor, directory }
+  pub fn new(config: Config, directory: Directory) -> Self {
+    Self { config, directory }
   }
 
   /// Creates a new note with the specified `name` in the Zettelkasten directory
@@ -22,11 +23,6 @@ impl Handler {
       .write_all(format!("---\nname: {}\n---\n", name).as_bytes())
       .context(error::Io)?;
 
-    println!(
-      "{}",
-      format!("Success! Note with filename `{}` created.", id).green()
-    );
-
     self.open(name)?;
 
     Ok(())
@@ -37,36 +33,27 @@ impl Handler {
   /// same `name`, the user will be prompted with `skim` to choose
   /// which file(s) is/are desired to be opened.
   pub fn open(&self, name: &str) -> Result<(), Error> {
-    if let Some(candidates) = self.directory.find(name) {
-      // if there's only one candidate note, open it and return
-      if candidates.len() == 1 {
-        let filename = candidates.first().unwrap().id.to_string();
-        Command::new(&self.editor)
-          .arg(&self.directory.path.join(filename))
-          .status()
-          .context(error::Io)?;
-        return Ok(());
-      }
+    let candidates = self.directory.find(name)?;
 
-      if let Some(selected_items) = Search::new(candidates).run() {
-        for item in selected_items.iter() {
-          if let Some(id) = NoteId::parse(&item.output().to_string()) {
-            let path = Path::join(&self.directory.path, Path::new(&id.to_string()));
-            Command::new(&self.editor)
-              .arg(&path)
-              .status()
-              .context(error::Io)?;
-          }
-        }
-      }
-
+    // if there's only one candidate note, open it and return
+    if candidates.len() == 1 {
+      let filename = candidates.first().unwrap().id.to_string();
+      Command::new(&self.config.editor)
+        .arg(&self.directory.path.join(filename))
+        .status()
+        .context(error::Io)?;
       return Ok(());
     }
 
-    println!(
-      "{}",
-      format!("No note with name `{}` was found.", name).red()
-    );
+    // try to open all candidate notes
+    for item in Search::new(candidates).run()? {
+      if let Some(id) = NoteId::parse(&item.output().to_string()) {
+        Command::new(&self.config.editor)
+          .arg(&self.directory.path.join(&id.to_string()))
+          .status()
+          .context(error::Io)?;
+      }
+    }
 
     Ok(())
   }
@@ -82,28 +69,28 @@ impl Handler {
   /// - Check if `left` and `right` do not already contain each other in
   /// the yaml frontmatter
   pub fn link(&self, left: &str, right: &str) -> Result<(), Error> {
-    if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
-      if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
-        let left = Note::new(self.directory.path.join(l.first().unwrap()));
+    let left = Note::new(
+      self.directory.path.join(
+        Search::new(self.directory.find(left)?)
+          .run()?
+          .first()
+          .unwrap(),
+      ),
+    );
 
-        let right = Note::new(self.directory.path.join(r.first().unwrap()));
+    let right = Note::new(
+      self.directory.path.join(
+        Search::new(self.directory.find(right)?)
+          .run()?
+          .first()
+          .unwrap(),
+      ),
+    );
 
-        left.add_link(&right.id.to_string())?;
+    left.add_link(&right.id.to_string())?;
+    right.add_link(&left.id.to_string())?;
 
-        right.add_link(&left.id.to_string())?;
-
-        println!("{}", format!("{} <-> {}", left.id, right.id).green());
-      } else {
-        println!(
-          "{}",
-          "You must choose two notes in order to link them together.".red()
-        );
-        return Ok(());
-      }
-    } else {
-      println!("{}", "Both notes must exist in order to be linked.".red());
-      return Ok(());
-    }
+    println!("{}", format!("{} <-> {}", left.id, right.id).green());
 
     Ok(())
   }
@@ -112,24 +99,16 @@ impl Handler {
   /// names of the notes that contain `tag` within the frontmatter and
   /// attempts to open each selected item.
   pub fn find(&self, tag: &str) -> Result<(), Error> {
-    if let Some(candidates) = self.directory.find_by_tag(tag) {
-      if let Some(selected_items) = Search::new(candidates).run() {
-        for item in selected_items.iter() {
-          if let Some(id) = NoteId::parse(&item.output().to_string()) {
-            Command::new(&self.editor)
-              .arg(&self.directory.path.join(id.to_string()))
-              .status()
-              .context(error::Io)?;
-          }
-        }
-      }
-      return Ok(());
-    }
+    let candidates = self.directory.find_by_tag(tag)?;
 
-    println!(
-      "{}",
-      format!("No notes exist with the tag `{}`.", tag).red()
-    );
+    for item in Search::new(candidates).run()? {
+      if let Some(id) = NoteId::parse(&item.output().to_string()) {
+        Command::new(&self.config.editor)
+          .arg(&self.directory.path.join(id.to_string()))
+          .status()
+          .context(error::Io)?;
+      }
+    }
 
     Ok(())
   }
@@ -137,14 +116,12 @@ impl Handler {
   /// Starts a fuzzy search using note id's in the Zettelkasten directory
   /// Powered by `skim` --> https://github.com/lotabout/skim
   pub fn search(&self) -> Result<(), Error> {
-    if let Some(selected_items) = Search::new(self.directory.notes()).run() {
-      for item in selected_items.iter() {
-        if let Some(id) = NoteId::parse(&item.output().to_string()) {
-          Command::new(&self.editor)
-            .arg(&self.directory.path.join(id.to_string()))
-            .status()
-            .context(error::Io)?;
-        }
+    for item in Search::new(self.directory.notes()?).run()? {
+      if let Some(id) = NoteId::parse(&item.output().to_string()) {
+        Command::new(&self.config.editor)
+          .arg(&self.directory.path.join(id.to_string()))
+          .status()
+          .context(error::Io)?;
       }
     }
     Ok(())
@@ -159,121 +136,94 @@ impl Handler {
   /// Removes an existing note in the Zettelkasten directory. This will
   /// also prompt the user if more than one note exists with `name`.
   pub fn remove(&self, name: &str) -> Result<(), Error> {
-    if let Some(candidates) = self.directory.find(name) {
-      // if there's only one candidate note, delete it and return
-      if candidates.len() == 1 {
-        let filename = candidates.first().unwrap().id.to_string();
-        fs::remove_file(&self.directory.path.join(filename)).unwrap();
-        return Ok(());
-      }
+    let candidates = self.directory.find(name)?;
 
-      let prompt = Search::new(candidates);
-
-      // delete each candidate note
-      if let Some(selections) = prompt.run() {
-        for selection in selections {
-          let path = Path::join(&self.directory.path, Path::new(&selection.to_string()));
-          fs::remove_file(&path).unwrap();
-        }
-      }
-
+    // if there's only one candidate note, delete it and return
+    if candidates.len() == 1 {
+      fs::remove_file(
+        &self
+          .directory
+          .path
+          .join(candidates.first().unwrap().id.to_string()),
+      )
+      .unwrap();
       return Ok(());
     }
 
-    println!(
-      "{}",
-      format!("No note with name `{}` was found.", name).red()
-    );
+    // delete each candidate note
+    for selection in Search::new(candidates).run()? {
+      fs::remove_file(&self.directory.path.join(&selection.to_string())).unwrap();
+    }
 
     Ok(())
   }
 
   /// Removes a link between two existing notes
   pub fn remove_link(&self, left: &str, right: &str) -> Result<(), Error> {
-    if let (Some(l), Some(r)) = (self.directory.find(left), self.directory.find(right)) {
-      if let (Some(l), Some(r)) = (Search::new(l).run(), Search::new(r).run()) {
-        let left = Note::new(self.directory.path.join(l.first().unwrap()));
+    let left = Note::new(
+      self.directory.path.join(
+        Search::new(self.directory.find(left)?)
+          .run()?
+          .first()
+          .unwrap(),
+      ),
+    );
 
-        let right = Note::new(self.directory.path.join(r.first().unwrap()));
+    let right = Note::new(
+      self.directory.path.join(
+        Search::new(self.directory.find(right)?)
+          .run()?
+          .first()
+          .unwrap(),
+      ),
+    );
 
-        left.remove_link(&right.id.to_string())?;
+    left.remove_link(&right.id.to_string())?;
+    right.remove_link(&left.id.to_string())?;
 
-        right.remove_link(&left.id.to_string())?;
+    println!("{}", format!("{} <-X-> {}", left.id, right.id).green());
 
-        println!("{}", format!("{} <-X-> {}", left.id, right.id).green());
-      } else {
-        println!(
-          "{}",
-          "You must choose two notes in order to remove a link between them.".red()
-        );
-        return Ok(());
-      }
-    } else {
-      println!(
-        "{}",
-        "Both notes must exist in order for a link to be removed.".red()
-      );
-      return Ok(());
-    }
     Ok(())
   }
 
   pub fn tag(&self, name: &str, tag: &str) -> Result<(), Error> {
-    if let Some(candidates) = self.directory.find(name) {
-      // if there's only one candidate note, tag it and return
-      if candidates.len() == 1 {
-        let candidate = candidates.first().unwrap();
-        candidate.add_tag(tag)?;
-        return Ok(());
-      }
+    let candidates = self.directory.find(name)?;
 
-      if let Some(selected_items) = Search::new(candidates).run() {
-        for item in selected_items.iter() {
-          if let Some(id) = NoteId::parse(&item.output().to_string()) {
-            let path = Path::join(&self.directory.path, Path::new(&id.to_string()));
-            let note = Note::new(path.to_owned());
-            note.add_tag(tag)?;
-          }
-        }
-      }
-
+    // if there's only one candidate note, tag it and return
+    if candidates.len() == 1 {
+      let candidate = candidates.first().unwrap();
+      candidate.add_tag(tag)?;
       return Ok(());
     }
 
-    println!(
-      "{}",
-      format!("No note with name `{}` was found.", name).red()
-    );
+    // tag each candidate note
+    for item in Search::new(candidates).run()? {
+      if let Some(id) = NoteId::parse(&item.output().to_string()) {
+        let note = Note::new(self.directory.path.join(&id.to_string()).to_owned());
+        note.add_tag(tag)?;
+      }
+    }
 
     Ok(())
   }
 
   pub fn remove_tag(&self, name: &str, tag: &str) -> Result<(), Error> {
-    if let Some(candidates) = self.directory.find(name) {
-      // if there's only one candidate note, tag it and return
-      if candidates.len() == 1 {
-        let candidate = candidates.first().unwrap();
-        candidate.remove_tag(tag)?;
-        return Ok(());
-      }
+    let candidates = self.directory.find(name)?;
 
-      if let Some(selected_items) = Search::new(candidates).run() {
-        for item in selected_items.iter() {
-          if let Some(id) = NoteId::parse(&item.output().to_string()) {
-            let path = Path::join(&self.directory.path, Path::new(&id.to_string()));
-            let note = Note::new(path.to_owned());
-            note.remove_tag(tag)?;
-          }
-        }
-      }
-
+    // if there's only one candidate note, tag it and return
+    if candidates.len() == 1 {
+      let candidate = candidates.first().unwrap();
+      candidate.remove_tag(tag)?;
       return Ok(());
     }
 
-    println!(
-      "{}",
-      format!("No note with name `{}` was found.", name).red()
-    );
+    // remove the tag from each candidate note
+    for item in Search::new(candidates).run()? {
+      if let Some(id) = NoteId::parse(&item.output().to_string()) {
+        let note = Note::new(self.directory.path.join(&id.to_string()).to_owned());
+        note.remove_tag(tag)?;
+      }
+    }
 
     Ok(())
   }

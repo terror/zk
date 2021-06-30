@@ -24,15 +24,15 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    dir       Zettelkasten storage location
-    find      Find Zettelkasten notes by tag
-    link      Link two existing Zettelkasten notes
-    new       Create a new Zettelkasten note
-    open      Open an existing Zettelkasten note
-    rm        Remove an existing Zettelkasten note
-    rmlink    Remove a link between two existing Zettelkasten notes
-    rmtag     Remove a tag from an existing Zettelkasten note
-    search    Fuzzy search Zettelkasten notes
-    tag       Add a tag to an existing Zettelkasten note
+    dir       Output the Zettelkasten directory path
+    search    Fuzzy search notes
+    find      Find notes by tag
+    new       Create a new note
+    open      Open a note
+    rm        Remove a note
+    link      Link two notes
+    rmlink    Remove a link between two notes
+    tag       Add a tag to a note
+    rmtag     Remove a tag from a note
     help      Prints this message or the help of the given subcommand(s)
 ```

@@ -34,7 +34,7 @@ impl From<&str> for Matter {
 }
 
 impl Matter {
-  pub fn to_string(matter: Matter) -> String {
+  pub fn into_string(matter: Matter) -> String {
     let mut result = String::from("---\n");
 
     if !matter.name.is_empty() {
@@ -55,8 +55,6 @@ impl Matter {
       });
     }
 
-    result.push_str("---\n");
-
-    result
+    format!("{}---\n", result)
   }
 }

@@ -3,22 +3,21 @@ use crate::common::*;
 const FILENAME: &str = ".zk.toml";
 
 const DEFAULT: &str = "
-path   = '~/.zk'
-editor = 'nvim'
+  path   = '~/.zk'
+  editor = 'nvim'
+  ext    = 'md'
 ";
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
-  /// Path to the Zettelkasten directory
-  pub path: PathBuf,
-
-  /// Editor of choice when opening and editing notes
+  pub path:   PathBuf,
   pub editor: String,
+  pub ext:    String,
 }
 
 impl Config {
   fn default() -> &'static str {
-    DEFAULT
+    DEFAULT.trim()
   }
 
   fn filename() -> &'static str {
@@ -37,7 +36,7 @@ impl Config {
     if let Some(path) = Self::path()? {
       let path = &path;
       let contents = fs::read_to_string(path).context(error::LoadConfig { path })?;
-      Ok(toml::from_str(&contents).unwrap())
+      Ok(toml::from_str(&contents).context(error::DeserializeConfig { path })?)
     } else {
       Ok(toml::from_str(Self::default()).unwrap())
     }
@@ -50,19 +49,19 @@ mod tests {
 
   #[test]
   fn test_load_default_config() {
-    let config = Config::load();
-
-    assert!(config.is_ok());
-
     if Config::path().unwrap().is_none() {
+      let config = Config::load();
+
+      assert!(config.is_ok());
+
       let config = config.unwrap();
 
       assert_eq!(
         config.path.expand(),
         Path::join(&dirs::home_dir().unwrap(), ".zk")
       );
-
       assert_eq!(config.editor, "nvim");
+      assert_eq!(config.ext, "md");
     }
   }
 }
