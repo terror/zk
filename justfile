@@ -30,3 +30,6 @@ watch +COMMAND='test':
 
 usage:
 	cargo run -- --help | pbcopy
+
+bin:
+	cp -r ./target/debug/zk /usr/local/bin

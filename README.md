@@ -1,4 +1,6 @@
-## `zk`
+## zk
+
+<img align="right" width="225" height="120" src="./assets/zk.png">
 
 ![Build and Test](https://github.com/terror/zk/actions/workflows/rust.yml/badge.svg)
 
