@@ -42,6 +42,10 @@ pub enum Opt {
   #[structopt(name = "rmtag")]
   /// Remove a tag from a note
   RemoveTag { name: String, tag: String },
+
+  #[structopt(name = "explore")]
+  /// Explore note links
+  Explore { name: String },
 }
 
 impl Opt {
@@ -64,6 +68,7 @@ impl Opt {
       Opt::RemoveLink { left, right } => handler.remove_link(&left, &right)?,
       Opt::Tag { name, tag } => handler.tag(&name, &tag)?,
       Opt::RemoveTag { name, tag } => handler.remove_tag(&name, &tag)?,
+      Opt::Explore { name } => handler.explore(&name)?,
     }
 
     Ok(())

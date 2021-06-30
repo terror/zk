@@ -2,7 +2,7 @@ use crate::common::*;
 
 #[derive(Debug)]
 pub struct Handler {
-  pub config:    Config,
+  pub config: Config,
   pub directory: Directory,
 }
 
@@ -224,6 +224,70 @@ impl Handler {
         note.remove_tag(tag)?;
       }
     }
+
+    Ok(())
+  }
+
+  pub fn explore(&self, name: &str) -> Result<(), Error> {
+    let note = Note::new(
+      self.directory.path.join(
+        Search::new(self.directory.find(name)?)
+          .run()?
+          .first()
+          .unwrap(),
+      ),
+    );
+
+    let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
+
+    for link in note.matter.links {
+      let note = Note::new(self.directory.path.join(link));
+      tx.send(Arc::new(SearchItem {
+        text: note.id.to_string(),
+        path: note.path.clone(),
+      }))
+      .unwrap();
+    }
+
+    drop(tx);
+
+    let options = SkimOptionsBuilder::default()
+      .height(Some("100%"))
+      .preview(Some(""))
+      .multi(true)
+      .bind(vec!["ctrl-e:abort", "Enter:accept"])
+      .build()
+      .unwrap();
+
+    Skim::run_with(&options, Some(rx)).map(|out| match out.final_key {
+      // explore the selected items links recursively
+      Key::Ctrl('e') => {
+        let selected_items = out
+          .selected_items
+          .iter()
+          .map(|selected_item| selected_item.output().to_string())
+          .collect::<Vec<String>>();
+
+        self
+          .explore(&NoteId::parse(selected_items.first().unwrap()).unwrap().name)
+          .unwrap();
+      }
+
+      // open the selected note
+      Key::Enter => {
+        let selected_items = out
+          .selected_items
+          .iter()
+          .map(|selected_item| selected_item.output().to_string())
+          .collect::<Vec<String>>();
+
+        self
+          .open(&NoteId::parse(selected_items.first().unwrap()).unwrap().name)
+          .unwrap();
+      }
+
+      _ => {}
+    });
 
     Ok(())
   }

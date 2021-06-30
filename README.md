@@ -26,15 +26,16 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    dir       Output the Zettelkasten directory path
-    search    Fuzzy search notes
-    find      Find notes by tag
-    new       Create a new note
-    open      Open a note
-    rm        Remove a note
-    link      Link two notes
-    rmlink    Remove a link between two notes
-    tag       Add a tag to a note
-    rmtag     Remove a tag from a note
-    help      Prints this message or the help of the given subcommand(s)
+    dir                    Output the Zettelkasten directory path
+    explore <name>         Explore a notes links recursively
+    find    <tag>          Find notes by tag
+    link    <left> <right> Link two notes
+    new     <name>         Create a new note
+    open    <name>         Open a note
+    rm      <name>         Remove a note
+    rmlink  <left> <right> Remove a link between two notes
+    rmtag   <name> <tag>   Remove a tag from a note
+    search                 Fuzzy search notes
+    tag     <name> <tag>   Add a tag to a note
+    help                   Prints this message or the help of the given subcommand(s)
 ```
