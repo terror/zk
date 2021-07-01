@@ -20,6 +20,13 @@ making new connections between seemingly unrelated ideas.
 - Works with a flat directory of files
 - Minimal configuration with sensible defaults
 
+### Demo
+
+Here is a quick demo showcasing the new, search, tag, link and explore
+features.
+
+[![asciicast](https://asciinema.org/a/4TrHLpcAv9lk0RfGngzS6ft3e.svg)](https://asciinema.org/a/4TrHLpcAv9lk0RfGngzS6ft3e)
+
 ### Installation
 
 You can install `zk` using cargo:
