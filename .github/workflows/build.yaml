@@ -1,0 +1,90 @@
+name: Build
+
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - '*'
+  pull_request:
+    branches:
+    - master
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CACHE_KEY: 0
+
+jobs:
+  all:
+    name: All
+
+    strategy:
+      matrix:
+        os:
+        - macos-latest
+        - ubuntu-latest
+
+    runs-on: ${{matrix.os}}
+
+    env:
+      RUSTFLAGS: "--deny warnings"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # An issue with BSD Tar causes sporadic failures on macOS.
+    # c.f https://github.com/actions/cache/issues/403
+    - name: Install GNU Tar
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install gnu-tar
+        echo /usr/local/opt/gnu-tar/libexec/gnubin > $GITHUB_PATH
+
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: cargo-${{ env.CACHE_KEY }}-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Install Nightly
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        target: ${{matrix.target}}
+        profile: minimal
+        components: rustfmt
+
+    - name: Install Clippy
+      run: |
+        rustup component add clippy
+
+    - name: Install just
+      run: |
+        if ! which just; then
+          git clone https://github.com/casey/just
+          cd just
+          git checkout v0.9.3
+          echo '1.51.0' > rust-toolchain
+          cargo install --path .
+        fi
+
+    - name: Info
+      run: |
+        rustup --version
+        cargo --version
+        cargo clippy --version
+
+    - name: Ci
+      run: just ci
+
+    - name: Forbid
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get install ripgrep
+        ./bin/forbid
