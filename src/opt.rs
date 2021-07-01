@@ -3,27 +3,27 @@ use crate::common::*;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "zk")]
 pub enum Opt {
-  #[structopt(name = "new")]
+  #[structopt(name = "new", alias = "n")]
   /// Create a new note
   New { name: String },
 
-  #[structopt(name = "open")]
+  #[structopt(name = "open", alias = "o")]
   /// Open a note
   Open { name: String },
 
-  #[structopt(name = "link")]
+  #[structopt(name = "link", alias = "l")]
   /// Link two notes
   Link { left: String, right: String },
 
-  #[structopt(name = "find")]
+  #[structopt(name = "find", alias = "f")]
   /// Find notes by tag
   Find { tag: String },
 
-  #[structopt(name = "search")]
+  #[structopt(name = "search", alias = "s")]
   /// Fuzzy search notes
   Search,
 
-  #[structopt(name = "dir")]
+  #[structopt(name = "dir", alias = "d")]
   /// Output the Zettelkasten directory path
   Dir,
 
@@ -31,19 +31,19 @@ pub enum Opt {
   /// Remove a note
   Remove { name: String },
 
-  #[structopt(name = "rmlink")]
+  #[structopt(name = "rmlink", alias = "rl")]
   /// Remove a link between two notes
   RemoveLink { left: String, right: String },
 
-  #[structopt(name = "tag")]
+  #[structopt(name = "tag", alias = "t")]
   /// Add a tag to a note
   Tag { name: String, tag: String },
 
-  #[structopt(name = "rmtag")]
+  #[structopt(name = "rmtag", alias = "rt")]
   /// Remove a tag from a note
   RemoveTag { name: String, tag: String },
 
-  #[structopt(name = "explore")]
+  #[structopt(name = "explore", alias = "e")]
   /// Explore note links
   Explore { name: String },
 }
