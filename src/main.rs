@@ -18,7 +18,7 @@ mod search_item;
 
 fn main() {
   match Opt::from_args().run() {
-    Ok(()) => {}
+    Ok(()) => {},
     Err(e) => eprintln!("{}", format!("{}", e).red()),
   };
 }

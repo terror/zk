@@ -31,5 +31,5 @@ watch +COMMAND='test':
 usage:
 	cargo run -- --help | pbcopy
 
-bin:
+bin: build
 	cp -r ./target/debug/zk /usr/local/bin

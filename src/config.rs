@@ -4,7 +4,7 @@ const FILENAME: &str = ".zk.toml";
 
 const DEFAULT: &str = "
   path   = '~/.zk'
-  editor = 'nvim'
+  editor = 'vim'
   ext    = 'md'
 ";
 
@@ -60,7 +60,7 @@ mod tests {
         config.path.expand(),
         Path::join(&dirs::home_dir().unwrap(), ".zk")
       );
-      assert_eq!(config.editor, "nvim");
+      assert_eq!(config.editor, "vim");
       assert_eq!(config.ext, "md");
     }
   }

@@ -34,6 +34,10 @@ impl From<&str> for Matter {
 }
 
 impl Matter {
+  pub fn default(name: &str) -> Vec<u8> {
+    format!("---\nname: {}\n---\n", &name).as_bytes().to_owned()
+  }
+
   pub fn into_string(matter: Matter) -> String {
     let mut result = String::from("---\n");
 

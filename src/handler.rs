@@ -2,7 +2,7 @@ use crate::common::*;
 
 #[derive(Debug)]
 pub struct Handler {
-  pub config: Config,
+  pub config:    Config,
   pub directory: Directory,
 }
 
@@ -15,13 +15,15 @@ impl Handler {
   /// with an appropriate prefix in addition to writing the default YAML
   /// frontmatter.
   pub fn create(&self, name: &str) -> Result<(), Error> {
-    let id = NoteId::new(name);
+    let mut file = File::create(
+      &self
+        .directory
+        .path
+        .join(NoteId::new(name, &self.config.ext).to_string()),
+    )
+    .context(error::Io)?;
 
-    let mut file = File::create(&self.directory.path.join(id.to_string())).context(error::Io)?;
-
-    file
-      .write_all(format!("---\nname: {}\n---\n", name).as_bytes())
-      .context(error::Io)?;
+    file.write_all(&Matter::default(name)).context(error::Io)?;
 
     self.open(name)?;
 
@@ -90,7 +92,11 @@ impl Handler {
     left.add_link(&right.id.to_string())?;
     right.add_link(&left.id.to_string())?;
 
-    println!("{}", format!("{} <-> {}", left.id, right.id).green());
+    println!(
+      "{} {}",
+      format!("{} <-> {}", left.id, right.id),
+      "✔".green()
+    );
 
     Ok(())
   }
@@ -181,11 +187,16 @@ impl Handler {
     left.remove_link(&right.id.to_string())?;
     right.remove_link(&left.id.to_string())?;
 
-    println!("{}", format!("{} <-X-> {}", left.id, right.id).green());
+    println!(
+      "{} {}",
+      format!("{} <-X-> {}", left.id, right.id),
+      "✔".green()
+    );
 
     Ok(())
   }
 
+  /// Adds a tag to an existing note
   pub fn tag(&self, name: &str, tag: &str) -> Result<(), Error> {
     let candidates = self.directory.find(name)?;
 
@@ -207,6 +218,7 @@ impl Handler {
     Ok(())
   }
 
+  /// Removes a tag from an existing note
   pub fn remove_tag(&self, name: &str, tag: &str) -> Result<(), Error> {
     let candidates = self.directory.find(name)?;
 
@@ -228,6 +240,22 @@ impl Handler {
     Ok(())
   }
 
+  /// Explores a notes links recursively.
+  ///
+  /// A user can either choose to
+  /// A) Explore a notes links
+  /// B) Edit a note
+  ///
+  /// Lets say we have the following simple adjacency list:
+  ///
+  /// a -> [b]
+  /// b -> [a, c, d]
+  /// c -> [b, d]
+  /// d -> [b, e, c]
+  /// e -> [d]
+  ///
+  /// A user can explore and end up at `e` in the following steps:
+  /// a -> b -> d -> e
   pub fn explore(&self, name: &str) -> Result<(), Error> {
     let note = Note::new(
       self.directory.path.join(
@@ -259,35 +287,37 @@ impl Handler {
       .build()
       .unwrap();
 
-    Skim::run_with(&options, Some(rx)).map(|out| match out.final_key {
-      // explore the selected items links recursively
-      Key::Ctrl('e') => {
-        let selected_items = out
-          .selected_items
-          .iter()
-          .map(|selected_item| selected_item.output().to_string())
-          .collect::<Vec<String>>();
+    if let Some(out) = Skim::run_with(&options, Some(rx)) {
+      match out.final_key {
+        // explore the selected items links recursively
+        Key::Enter => {
+          let selected_items = out
+            .selected_items
+            .iter()
+            .map(|selected_item| selected_item.output().to_string())
+            .collect::<Vec<String>>();
 
-        self
-          .explore(&NoteId::parse(selected_items.first().unwrap()).unwrap().name)
-          .unwrap();
-      }
+          if let Some(item) = selected_items.first() {
+            self.explore(&NoteId::parse(item).unwrap().name)?
+          }
+        },
 
-      // open the selected note
-      Key::Enter => {
-        let selected_items = out
-          .selected_items
-          .iter()
-          .map(|selected_item| selected_item.output().to_string())
-          .collect::<Vec<String>>();
+        // edit the selected note
+        Key::Ctrl('e') => {
+          let selected_items = out
+            .selected_items
+            .iter()
+            .map(|selected_item| selected_item.output().to_string())
+            .collect::<Vec<String>>();
 
-        self
-          .open(&NoteId::parse(selected_items.first().unwrap()).unwrap().name)
-          .unwrap();
-      }
+          if let Some(item) = selected_items.first() {
+            self.open(&NoteId::parse(item).unwrap().name)?
+          }
+        },
 
-      _ => {}
-    });
+        _ => {},
+      };
+    }
 
     Ok(())
   }

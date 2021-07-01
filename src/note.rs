@@ -53,10 +53,10 @@ impl Note {
       println!(
         "{}",
         format!(
-          "Note: `{}` already contains a link to `{}`",
+          "Note `{}` already contains a link to `{}`",
           self.id.name, name
         )
-        .red()
+        .yellow()
       );
       return Ok(());
     }
@@ -93,10 +93,10 @@ impl Note {
       println!(
         "{}",
         format!(
-          "Note: `{}` already does not contain a link to `{}`",
+          "Note `{}` does not contain a link to `{}`",
           self.id.name, name
         )
-        .red()
+        .yellow()
       );
       return Ok(());
     }
@@ -132,7 +132,7 @@ impl Note {
       println!(
         "{}",
         format!(
-          "Note `{}` already contains the tag `{}`",
+          "Note `{}` already contains the tag `{}`.",
           self.id.name, name
         )
         .red()
@@ -172,7 +172,7 @@ impl Note {
       println!(
         "{}",
         format!(
-          "Note: `{}` already does not contain the tag `{}`",
+          "Note `{}` does not contain the tag `{}`.",
           self.id.name, name
         )
         .red()

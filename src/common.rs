@@ -1,7 +1,9 @@
 // stdlib
 pub use std::{
   borrow::Cow,
-  env, fmt,
+  env,
+  ffi::OsStr,
+  fmt,
   fs::{self, File},
   io::{self, prelude::*, Cursor},
   path::{Path, PathBuf},
