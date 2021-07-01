@@ -7,7 +7,7 @@ build:
 	cargo build
 
 test:
-	cargo test
+	cargo test -- --test-threads=1
 
 clippy:
   cargo clippy --all-targets --all-features

@@ -48,7 +48,7 @@ impl Note {
   }
 
   /// Attempts to add `name` as a link to the current note.
-  pub fn add_link(&self, name: &str) -> Result<(), Error> {
+  pub fn add_link(&self, name: &str) -> Result<Note, Error> {
     if self.has_link(name) {
       println!(
         "{}",
@@ -58,7 +58,7 @@ impl Note {
         )
         .yellow()
       );
-      return Ok(());
+      return Ok(self.clone());
     }
 
     let mut new = self
@@ -84,11 +84,11 @@ impl Note {
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(())
+    Ok(Note::new(self.path.to_owned()))
   }
 
   /// Attempts to remove `name` as a link from the current note.
-  pub fn remove_link(&self, name: &str) -> Result<(), Error> {
+  pub fn remove_link(&self, name: &str) -> Result<Note, Error> {
     if !self.has_link(name) {
       println!(
         "{}",
@@ -98,7 +98,7 @@ impl Note {
         )
         .yellow()
       );
-      return Ok(());
+      return Ok(self.clone());
     }
 
     let new = self
@@ -123,11 +123,11 @@ impl Note {
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(())
+    Ok(Note::new(self.path.to_owned()))
   }
 
   /// Attempts to add `name` as a tag to the current note.
-  pub fn add_tag(&self, name: &str) -> Result<(), Error> {
+  pub fn add_tag(&self, name: &str) -> Result<Note, Error> {
     if self.has_tag(name) {
       println!(
         "{}",
@@ -137,7 +137,7 @@ impl Note {
         )
         .red()
       );
-      return Ok(());
+      return Ok(self.clone());
     }
 
     let mut new = self
@@ -163,11 +163,11 @@ impl Note {
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(())
+    Ok(Note::new(self.path.to_owned()))
   }
 
   /// Attempts to remove `name` as a tag from the current note.
-  pub fn remove_tag(&self, name: &str) -> Result<(), Error> {
+  pub fn remove_tag(&self, name: &str) -> Result<Note, Error> {
     if !self.has_tag(name) {
       println!(
         "{}",
@@ -177,7 +177,7 @@ impl Note {
         )
         .red()
       );
-      return Ok(());
+      return Ok(self.clone());
     }
 
     let new = self
@@ -202,6 +202,83 @@ impl Note {
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(())
+    Ok(Note::new(self.path.to_owned()))
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  pub fn create(note_id: &NoteId) -> Result<Note, Error> {
+    let path = env::current_dir().unwrap().join(&note_id.to_string());
+
+    let mut file = File::create(&path).context(error::Io)?;
+
+    file
+      .write_all(&Matter::default(&note_id.name))
+      .context(error::Io)?;
+
+    Ok(Note::new(path))
+  }
+
+  #[test]
+  fn test_add_link() {
+    in_temp_dir!({
+      let a = create(&NoteId::new("a", "md")).unwrap();
+      let link = NoteId::new("b", "md").to_string();
+
+      let a = a.remove_link(&link).unwrap();
+      assert!(!a.has_link(&link));
+
+      let a = a.add_link(&link).unwrap();
+      assert!(a.has_link(&link));
+    });
+  }
+
+  #[test]
+  fn test_add_tag() {
+    in_temp_dir!({
+      let a = create(&NoteId::new("a", "md")).unwrap();
+
+      let a = a.remove_tag("software").unwrap();
+      assert!(!a.has_tag("software"));
+
+      let a = a.add_tag("software").unwrap();
+      assert!(a.has_tag("software"));
+    });
+  }
+
+  #[test]
+  fn test_remove_link() {
+    in_temp_dir!({
+      let a = create(&NoteId::new("a", "md")).unwrap();
+      let link = NoteId::new("b", "md").to_string();
+
+      let a = a.remove_link(&link).unwrap();
+      assert!(!a.has_link(&link));
+
+      let a = a.add_link(&link).unwrap();
+      assert!(a.has_link(&link));
+
+      let a = a.remove_link(&link).unwrap();
+      assert!(!a.has_link(&link));
+    });
+  }
+
+  #[test]
+  fn test_remove_tag() {
+    in_temp_dir!({
+      let a = create(&NoteId::new("a", "md")).unwrap();
+
+      let a = a.remove_tag("software").unwrap();
+      assert!(!a.has_tag("software"));
+
+      let a = a.add_tag("software").unwrap();
+      assert!(a.has_tag("software"));
+
+      let a = a.remove_tag("software").unwrap();
+      assert!(!a.has_tag("software"));
+    });
   }
 }
