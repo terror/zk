@@ -141,24 +141,41 @@ impl Handler {
 
   /// Removes an existing note in the Zettelkasten directory. This will
   /// also prompt the user if more than one note exists with `name`.
+  ///
+  /// This method should scan all notes with a link to the soon to be
+  /// deleted note and remove those links.
   pub fn remove(&self, name: &str) -> Result<(), Error> {
     let candidates = self.directory.find(name)?;
 
     // if there's only one candidate note, delete it and return
     if candidates.len() == 1 {
-      fs::remove_file(
-        &self
-          .directory
-          .path
-          .join(candidates.first().unwrap().id.to_string()),
-      )
-      .unwrap();
+      let file = &candidates.first().unwrap().id.to_string();
+
+      for note in self.directory.notes()? {
+        if note.has_link(file) {
+          note.remove_link(file)?;
+        }
+      }
+
+      fs::remove_file(&self.directory.path.join(file)).unwrap();
+
       return Ok(());
     }
 
-    // delete each candidate note
+    // delete each candidate note, removing links
+    // from each note that links to it
     for selection in Search::new(candidates).run()? {
-      fs::remove_file(&self.directory.path.join(&selection.to_string())).unwrap();
+      let file = &selection.to_string();
+
+      let path = &self.directory.path.join(file);
+
+      for note in self.directory.notes()? {
+        if note.has_link(file) {
+          note.remove_link(file)?;
+        }
+      }
+
+      fs::remove_file(path).unwrap();
     }
 
     Ok(())
