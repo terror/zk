@@ -29,9 +29,9 @@ features.
 
 ### Installation
 
-You can install `zk` using cargo:
+You can install `zk` using cargo (note the `zkt` crate name):
 ```bash
-$ cargo install zk
+$ cargo install zkt
 ```
 
 ### Usage

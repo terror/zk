@@ -1,7 +1,7 @@
 [package]
-name        = "zk"
+name        = "zkt"
 version     = "0.0.1"
-description = "A zettelkasten command line interface."
+description = "A note-taking tool based on the famous Zettelkasten method"
 authors     = ["Liam <liam@scalzulli.com>"]
 license     = "CC0-1.0"
 homepage    = "https://github.com/terror/zk"
@@ -10,6 +10,10 @@ edition     = "2018"
 categories  = ["command-line-utilities"]
 keywords    = ["command-line", "productivity", "note-taking", "utility"]
 resolver    = "2"
+
+[[bin]]
+name = "zk"
+path = "src/main.rs"
 
 [dependencies]
 chrono      = "0.4.19"
