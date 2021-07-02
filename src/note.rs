@@ -3,14 +3,11 @@ use crate::common::*;
 #[derive(Debug, Clone)]
 pub struct Note {
   /// The notes timestamp prefix and name.
-  pub id: NoteId,
-
+  pub id:      NoteId,
   /// Where the note is currently stored.
-  pub path: PathBuf,
-
+  pub path:    PathBuf,
   /// Yaml frontmatter.
-  pub matter: Matter,
-
+  pub matter:  Matter,
   /// The notes content as a String.
   pub content: String,
 }
@@ -209,18 +206,7 @@ impl Note {
 #[cfg(test)]
 mod tests {
   use super::*;
-
-  pub fn create(note_id: &NoteId) -> Result<Note, Error> {
-    let path = env::current_dir().unwrap().join(&note_id.to_string());
-
-    let mut file = File::create(&path).context(error::Io)?;
-
-    file
-      .write_all(&Matter::default(&note_id.name))
-      .context(error::Io)?;
-
-    Ok(Note::new(path))
-  }
+  use crate::test_utils::create;
 
   #[test]
   fn test_add_link() {

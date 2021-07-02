@@ -12,7 +12,7 @@ impl Directory {
   }
 
   /// Constructs a `Vec<Note>` based on a the directories path. This attempts to
-  /// convert each instance of a markdown file into a `Note`.
+  /// convert each instance of a file with extension `ext` into a `Note`.
   pub fn notes(&self) -> Result<Vec<Note>, Error> {
     let mut notes = Vec::new();
 
@@ -25,7 +25,15 @@ impl Directory {
     WalkDir::new(&self.path)
       .into_iter()
       .map(|entry| entry.unwrap().into_path())
-      .filter(|entry| entry.is_file() && entry.extension().unwrap().to_str().unwrap() == self.ext)
+      .filter(|entry| {
+        entry.is_file()
+          && entry
+            .extension()
+            .unwrap_or_else(|| OsStr::new(""))
+            .to_str()
+            .unwrap()
+            == self.ext
+      })
       .for_each(|entry| {
         notes.push(Note::new(entry));
       });
@@ -92,5 +100,65 @@ impl Directory {
       }),
       _ => Ok(ret.to_vec()),
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::test_utils::{create, sleep};
+
+  #[test]
+  fn test_notes() {
+    in_temp_dir!({
+      create(&NoteId::new("a", "md")).unwrap();
+      create(&NoteId::new("b", "md")).unwrap();
+      create(&NoteId::new("c", "md")).unwrap();
+
+      let directory = Directory::new(env::current_dir().unwrap(), String::from("md"));
+      let notes = directory.notes().unwrap();
+
+      assert_eq!(notes.len(), 3);
+    });
+  }
+
+  #[test]
+  fn test_find() {
+    in_temp_dir!({
+      // create 5 notes with name `a`
+      for _ in 0..5 {
+        create(&NoteId::new("a", "md")).unwrap();
+        sleep();
+      }
+
+      let directory = Directory::new(env::current_dir().unwrap(), String::from("md"));
+      let notes = directory.find("a").unwrap();
+
+      assert_eq!(notes.len(), 5);
+
+      for note in notes {
+        assert_eq!(note.id.name, "a");
+      }
+    });
+  }
+
+  #[test]
+  fn test_find_by_tag() {
+    in_temp_dir!({
+      let a = create(&NoteId::new("a", "md")).unwrap();
+      let b = create(&NoteId::new("b", "md")).unwrap();
+
+      a.add_tag("software").unwrap();
+      b.add_tag("software").unwrap();
+
+      let directory = Directory::new(env::current_dir().unwrap(), String::from("md"));
+      let notes = directory.find_by_tag("software").unwrap();
+
+      assert_eq!(notes.len(), 2);
+
+      for note in notes {
+        assert!(note.has_tag("software"));
+      }
+    });
   }
 }
