@@ -84,6 +84,16 @@ editor = 'vim'
 ext = 'md'
 ```
 
+### Keybindings
+
+The fuzzy finder `skim` supports the implementation of custom keybindings, this
+section documents the custom keybindings that are implemented when using
+various commands.
+
+| Command | Keybindings                                                                      |
+|---------|----------------------------------------------------------------------------------|
+| explore | `<C-e>` - Edit the selected note<br/> `Enter` - Explore the selected notes links |
+
 ### Related work
 [`srid/neuron`](https://github.com/srid/neuron) - Future-proof note-taking and publishing based on Zettelkasten
 
