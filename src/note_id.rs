@@ -42,15 +42,11 @@ impl NoteId {
     let mut split =
       filename[..filename.rfind('.').unwrap_or_else(|| filename.len())].splitn(2, '-');
 
-    if let (Some(prefix), Some(name)) = (split.next(), split.next()) {
-      return Some(Self {
-        prefix: prefix.to_owned(),
-        name:   name.to_owned(),
-        ext:    ext.to_owned(),
-      });
-    }
-
-    None
+    Some(Self {
+      prefix: split.next().unwrap_or("").to_owned(),
+      name:   split.next().unwrap_or("").to_owned(),
+      ext:    ext.to_owned(),
+    })
   }
 }
 
@@ -60,50 +56,23 @@ mod tests {
 
   #[test]
   fn test_parse() {
-    // 123-a
-    assert_eq!(NoteId::parse("123-a").unwrap().prefix, "123");
-    assert_eq!(NoteId::parse("123-a").unwrap().name, "a");
-    assert_eq!(NoteId::parse("123-a").unwrap().ext, "");
+    let cases = vec![
+      ("123-a", "123", "a", ""),
+      ("123-a.md", "123", "a", "md"),
+      ("abc123-", "abc123", "", ""),
+      ("", "", "", ""),
+      ("abc123", "abc123", "", ""),
+      ("123292.md", "123292", "", "md"),
+      ("123292-binary-search.md", "123292", "binary-search", "md"),
+      ("123.292-binary-search.md", "123.292", "binary-search", "md"),
+    ];
 
-    // 123-a.md
-    assert_eq!(NoteId::parse("123-a.md").unwrap().prefix, "123");
-    assert_eq!(NoteId::parse("123-a.md").unwrap().name, "a");
-    assert_eq!(NoteId::parse("123-a.md").unwrap().ext, "md");
-
-    // abc123-
-    assert_eq!(NoteId::parse("abc123-").unwrap().prefix, "abc123");
-    assert_eq!(NoteId::parse("abc123-").unwrap().name, "");
-    assert_eq!(NoteId::parse("abc123-").unwrap().ext, "");
-
-    // ""
-    assert!(NoteId::parse("").is_none());
-
-    // abc123
-    assert!(NoteId::parse("abc123").is_none());
-
-    // 123292.md
-    assert!(NoteId::parse("123292.md").is_none());
-
-    // 123292-binary-search.md
-    assert_eq!(
-      NoteId::parse("123292-binary-search.md").unwrap().prefix,
-      "123292"
-    );
-    assert_eq!(
-      NoteId::parse("123292-binary-search.md").unwrap().name,
-      "binary-search"
-    );
-    assert_eq!(NoteId::parse("123292-binary-search.md").unwrap().ext, "md");
-
-    // 123.292-binary-search.md
-    assert_eq!(
-      NoteId::parse("123.292-binary-search.md").unwrap().prefix,
-      "123.292"
-    );
-    assert_eq!(
-      NoteId::parse("123.292-binary-search.md").unwrap().name,
-      "binary-search"
-    );
-    assert_eq!(NoteId::parse("123.292-binary-search.md").unwrap().ext, "md");
+    for case in cases {
+      let (test, prefix, name, ext) = case;
+      let id = NoteId::parse(test).unwrap();
+      assert_eq!(id.prefix, prefix);
+      assert_eq!(id.name, name);
+      assert_eq!(id.ext, ext);
+    }
   }
 }
