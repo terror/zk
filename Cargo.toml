@@ -1,6 +1,6 @@
 [package]
 name        = "zkt"
-version     = "0.0.1"
+version     = "0.0.2"
 description = "A note-taking tool based on the famous Zettelkasten method"
 authors     = ["Liam <liam@scalzulli.com>"]
 license     = "CC0-1.0"
