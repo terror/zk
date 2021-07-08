@@ -14,7 +14,6 @@ mod note;
 mod note_id;
 mod opt;
 mod search;
-mod search_item;
 
 fn main() {
   match Opt::from_args().run() {

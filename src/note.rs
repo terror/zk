@@ -12,6 +12,16 @@ pub struct Note {
   pub content: String,
 }
 
+impl SkimItem for Note {
+  fn text(&self) -> Cow<str> {
+    Cow::Owned(self.id.to_string())
+  }
+
+  fn preview(&self, _context: PreviewContext) -> ItemPreview {
+    ItemPreview::Command(format!("cat {}", self.path.display()))
+  }
+}
+
 impl Note {
   pub fn new(path: PathBuf) -> Self {
     let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();

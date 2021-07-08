@@ -10,16 +10,10 @@ impl Search {
   }
 
   /// This method launches a `skim` fuzzy search with `items` and
-  /// returns the selected items.
-  pub fn run(&self) -> Result<Vec<String>, Error> {
+  /// returns the selected items as their original type.
+  pub fn run(&self) -> Result<Vec<Note>, Error> {
     if self.items.len() == 1 {
-      return Ok(
-        self
-          .items
-          .iter()
-          .map(|note| note.id.to_string())
-          .collect::<Vec<String>>(),
-      );
+      return Ok(self.items.clone());
     }
 
     let options = SkimOptionsBuilder::default()
@@ -31,13 +25,10 @@ impl Search {
 
     let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
-    for note in &self.items {
-      tx.send(Arc::new(SearchItem {
-        text: note.id.to_string(),
-        path: note.path.clone(),
-      }))
-      .unwrap();
-    }
+    self
+      .items
+      .iter()
+      .for_each(|note| tx.send(Arc::new(note.to_owned())).unwrap());
 
     drop(tx);
 
@@ -45,8 +36,14 @@ impl Search {
       .map(|out| out.selected_items)
       .unwrap_or_else(Vec::new)
       .iter()
-      .map(|selected_item| selected_item.output().to_string())
-      .collect::<Vec<String>>();
+      .map(|selected_item| {
+        (**selected_item)
+          .as_any()
+          .downcast_ref::<Note>()
+          .unwrap()
+          .to_owned()
+      })
+      .collect::<Vec<Note>>();
 
     match selected_items.len() {
       0 => Err(error::Error::NoteNotSelected),

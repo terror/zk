@@ -39,22 +39,20 @@ impl Handler {
 
     // if there's only one candidate note, open it and return
     if candidates.len() == 1 {
-      let filename = candidates.first().unwrap().id.to_string();
+      let note = candidates.first().unwrap();
       Command::new(&self.config.editor)
-        .arg(&self.directory.path.join(filename))
+        .arg(&note.path)
         .status()
         .context(error::Io)?;
       return Ok(());
     }
 
     // try to open all candidate notes
-    for item in Search::new(candidates).run()? {
-      if let Some(id) = NoteId::parse(&item.output().to_string()) {
-        Command::new(&self.config.editor)
-          .arg(&self.directory.path.join(&id.to_string()))
-          .status()
-          .context(error::Io)?;
-      }
+    for note in Search::new(candidates).run()? {
+      Command::new(&self.config.editor)
+        .arg(&note.path)
+        .status()
+        .context(error::Io)?;
     }
 
     Ok(())
@@ -71,23 +69,17 @@ impl Handler {
   /// - Check if `left` and `right` do not already contain each other in
   /// the yaml frontmatter
   pub fn link(&self, left: &str, right: &str) -> Result<(), Error> {
-    let left = Note::new(
-      self.directory.path.join(
-        Search::new(self.directory.find(left)?)
-          .run()?
-          .first()
-          .unwrap(),
-      ),
-    );
+    let left = Search::new(self.directory.find(left)?)
+      .run()?
+      .first()
+      .unwrap()
+      .to_owned();
 
-    let right = Note::new(
-      self.directory.path.join(
-        Search::new(self.directory.find(right)?)
-          .run()?
-          .first()
-          .unwrap(),
-      ),
-    );
+    let right = Search::new(self.directory.find(right)?)
+      .run()?
+      .first()
+      .unwrap()
+      .to_owned();
 
     left.add_link(&right.id.to_string())?;
     right.add_link(&left.id.to_string())?;
@@ -107,13 +99,11 @@ impl Handler {
   pub fn find(&self, tag: &str) -> Result<(), Error> {
     let candidates = self.directory.find_by_tag(tag)?;
 
-    for item in Search::new(candidates).run()? {
-      if let Some(id) = NoteId::parse(&item.output().to_string()) {
-        Command::new(&self.config.editor)
-          .arg(&self.directory.path.join(id.to_string()))
-          .status()
-          .context(error::Io)?;
-      }
+    for note in Search::new(candidates).run()? {
+      Command::new(&self.config.editor)
+        .arg(&note.path)
+        .status()
+        .context(error::Io)?;
     }
 
     Ok(())
@@ -122,13 +112,11 @@ impl Handler {
   /// Starts a fuzzy search using note id's in the Zettelkasten directory
   /// Powered by `skim` --> https://github.com/lotabout/skim
   pub fn search(&self) -> Result<(), Error> {
-    for item in Search::new(self.directory.notes()?).run()? {
-      if let Some(id) = NoteId::parse(&item.output().to_string()) {
-        Command::new(&self.config.editor)
-          .arg(&self.directory.path.join(id.to_string()))
-          .status()
-          .context(error::Io)?;
-      }
+    for note in Search::new(self.directory.notes()?).run()? {
+      Command::new(&self.config.editor)
+        .arg(&note.path)
+        .status()
+        .context(error::Io)?;
     }
     Ok(())
   }
@@ -149,33 +137,33 @@ impl Handler {
 
     // if there's only one candidate note, delete it and return
     if candidates.len() == 1 {
-      let file = &candidates.first().unwrap().id.to_string();
+      let candidate = candidates.first().unwrap();
+
+      let id = &candidate.id.to_string();
 
       for note in self.directory.notes()? {
-        if note.has_link(file) {
-          note.remove_link(file)?;
+        if note.has_link(id) {
+          note.remove_link(id)?;
         }
       }
 
-      fs::remove_file(&self.directory.path.join(file)).unwrap();
+      fs::remove_file(&candidate.path).unwrap();
 
       return Ok(());
     }
 
     // delete each candidate note, removing links
     // from each note that links to it
-    for selection in Search::new(candidates).run()? {
-      let file = &selection.to_string();
-
-      let path = &self.directory.path.join(file);
+    for candidate in Search::new(candidates).run()? {
+      let id = &candidate.id.to_string();
 
       for note in self.directory.notes()? {
-        if note.has_link(file) {
-          note.remove_link(file)?;
+        if note.has_link(id) {
+          note.remove_link(id)?;
         }
       }
 
-      fs::remove_file(path).unwrap();
+      fs::remove_file(candidate.path).unwrap();
     }
 
     Ok(())
@@ -183,23 +171,17 @@ impl Handler {
 
   /// Removes a link between two existing notes
   pub fn remove_link(&self, left: &str, right: &str) -> Result<(), Error> {
-    let left = Note::new(
-      self.directory.path.join(
-        Search::new(self.directory.find(left)?)
-          .run()?
-          .first()
-          .unwrap(),
-      ),
-    );
+    let left = Search::new(self.directory.find(left)?)
+      .run()?
+      .first()
+      .unwrap()
+      .to_owned();
 
-    let right = Note::new(
-      self.directory.path.join(
-        Search::new(self.directory.find(right)?)
-          .run()?
-          .first()
-          .unwrap(),
-      ),
-    );
+    let right = Search::new(self.directory.find(right)?)
+      .run()?
+      .first()
+      .unwrap()
+      .to_owned();
 
     left.remove_link(&right.id.to_string())?;
     right.remove_link(&left.id.to_string())?;
@@ -225,11 +207,8 @@ impl Handler {
     }
 
     // tag each candidate note
-    for item in Search::new(candidates).run()? {
-      if let Some(id) = NoteId::parse(&item.output().to_string()) {
-        let note = Note::new(self.directory.path.join(&id.to_string()).to_owned());
-        note.add_tag(tag)?;
-      }
+    for note in Search::new(candidates).run()? {
+      note.add_tag(tag)?;
     }
 
     Ok(())
@@ -247,11 +226,8 @@ impl Handler {
     }
 
     // remove the tag from each candidate note
-    for item in Search::new(candidates).run()? {
-      if let Some(id) = NoteId::parse(&item.output().to_string()) {
-        let note = Note::new(self.directory.path.join(&id.to_string()).to_owned());
-        note.remove_tag(tag)?;
-      }
+    for note in Search::new(candidates).run()? {
+      note.remove_tag(tag)?;
     }
 
     Ok(())
@@ -274,27 +250,11 @@ impl Handler {
   /// A user can explore and end up at `e` in the following steps:
   /// a -> b -> d -> e
   pub fn explore(&self, name: &str) -> Result<(), Error> {
-    let note = Note::new(
-      self.directory.path.join(
-        Search::new(self.directory.find(name)?)
-          .run()?
-          .first()
-          .unwrap(),
-      ),
-    );
-
-    let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
-
-    for link in note.matter.links {
-      let note = Note::new(self.directory.path.join(link));
-      tx.send(Arc::new(SearchItem {
-        text: note.id.to_string(),
-        path: note.path.clone(),
-      }))
-      .unwrap();
-    }
-
-    drop(tx);
+    let note = Search::new(self.directory.find(name)?)
+      .run()?
+      .first()
+      .unwrap()
+      .to_owned();
 
     let options = SkimOptionsBuilder::default()
       .height(Some("100%"))
@@ -304,33 +264,40 @@ impl Handler {
       .build()
       .unwrap();
 
+    let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
+
+    note.matter.links.iter().for_each(|link| {
+      tx.send(Arc::new(Note::new(self.directory.path.join(link))))
+        .unwrap();
+    });
+
+    drop(tx);
+
     if let Some(out) = Skim::run_with(&options, Some(rx)) {
+      let selected_items = out
+        .selected_items
+        .iter()
+        .map(|selected_item| {
+          (**selected_item)
+            .as_any()
+            .downcast_ref::<Note>()
+            .unwrap()
+            .clone()
+        })
+        .collect::<Vec<Note>>();
+
       match out.final_key {
         // explore the selected items links recursively
-        Key::Enter => {
-          let selected_items = out
-            .selected_items
-            .iter()
-            .map(|selected_item| selected_item.output().to_string())
-            .collect::<Vec<String>>();
-
+        Key::Enter =>
           if let Some(item) = selected_items.first() {
-            self.explore(&NoteId::parse(item).unwrap().name)?
-          }
-        },
+            self.explore(&item.id.name)?
+          },
 
         // edit the selected note
-        Key::Ctrl('e') => {
-          let selected_items = out
-            .selected_items
-            .iter()
-            .map(|selected_item| selected_item.output().to_string())
-            .collect::<Vec<String>>();
-
+        Key::Ctrl('e') =>
           if let Some(item) = selected_items.first() {
-            self.open(&NoteId::parse(item).unwrap().name)?
-          }
-        },
+            self.open(&item.id.name)?
+          },
 
         _ => {},
       };
