@@ -24,14 +24,13 @@ pub use snafu::{ResultExt, Snafu};
 pub use structopt::StructOpt;
 pub use toml;
 pub use walkdir::WalkDir;
-pub use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
 
 // modules
 pub(crate) use crate::error;
 
 // test crates
 #[cfg(test)]
-pub use tempfile::TempDir;
+pub use {tempfile::TempDir, textwrap::dedent};
 
 // structs and enums
 pub use crate::{

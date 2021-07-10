@@ -266,10 +266,15 @@ impl Handler {
 
     let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
-    note.matter.links.iter().for_each(|link| {
-      tx.send(Arc::new(Note::new(self.directory.path.join(link))))
-        .unwrap();
-    });
+    note
+      .matter
+      .links
+      .unwrap_or_default()
+      .iter()
+      .for_each(|link| {
+        tx.send(Arc::new(Note::new(self.directory.path.join(link)).unwrap()))
+          .unwrap();
+      });
 
     drop(tx);
 
