@@ -49,7 +49,7 @@ mod tests {
         - c
       "#;
 
-    // This is what we want
+    // This is what we want (when deserializing)
     let want = r#"
       ---
       name: 123-a
@@ -71,15 +71,15 @@ mod tests {
 
   #[test]
   fn from() {
-    let (matter, _, want) = setup();
-    let res = Matter::into(matter).unwrap();
-    assert_eq!(res, want);
-  }
-
-  #[test]
-  fn to_string() {
     let (matter, as_str, _) = setup();
     let res: Matter = Matter::from(as_str.as_str()).unwrap();
     assert_eq!(res, matter);
+  }
+
+  #[test]
+  fn into() {
+    let (matter, _, want) = setup();
+    let res = Matter::into(matter).unwrap();
+    assert_eq!(res, want);
   }
 }
