@@ -22,7 +22,7 @@ pub fn create(note_id: &NoteId) -> Result<Note, Error> {
     .write_all(&Matter::default(&note_id.name))
     .context(error::Io)?;
 
-  Ok(Note::new(path))
+  Note::new(path)
 }
 
 #[cfg(test)]

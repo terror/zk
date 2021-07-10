@@ -32,6 +32,16 @@ pub enum Error {
     var:    String,
   },
 
+  #[snafu(display("Failed to serialize frontmatter."))]
+  MatterSerialize {
+    source: serde_yaml::Error,
+  },
+
+  #[snafu(display("Failed to deserialize frontmatter."))]
+  MatterDeserialize {
+    source: serde_yaml::Error,
+  },
+
   #[snafu(display("Note with name `{}` does not exist.", name))]
   NoteNotFound {
     name: String,

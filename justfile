@@ -1,5 +1,4 @@
-default:
-	just --list
+default: fmt ci
 
 ci: build test clippy fmt-check
 

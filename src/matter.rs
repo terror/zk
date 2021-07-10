@@ -1,64 +1,85 @@
 use crate::common::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Matter {
   pub name:  String,
-  pub tags:  Vec<String>,
-  pub links: Vec<String>,
-}
-
-/// Attempts to turn the str `content` into `Matter` struct with the
-/// appropriate fields.
-impl From<&str> for Matter {
-  fn from(content: &str) -> Self {
-    let matter = YamlLoader::load_from_str(&content).unwrap()[0].clone();
-
-    let name = matter["name"].as_str().unwrap_or(&String::new()).to_owned();
-
-    let tags = matter["tags"]
-      .as_vec()
-      .unwrap_or(&Vec::new())
-      .iter()
-      .map(|tag| tag.as_str().unwrap().to_string())
-      .collect::<Vec<String>>();
-
-    let links = matter["links"]
-      .as_vec()
-      .unwrap_or(&Vec::new())
-      .iter()
-      .map(|tag| tag.as_str().unwrap().to_string())
-      .collect::<Vec<String>>();
-
-    Self { name, tags, links }
-  }
+  pub tags:  Option<Vec<String>>,
+  pub links: Option<Vec<String>>,
 }
 
 impl Matter {
+  /// Constructs a default frontmatter as bytes
   pub fn default(name: &str) -> Vec<u8> {
     format!("---\nname: {}\n---\n", &name).as_bytes().to_owned()
   }
 
-  pub fn into_string(matter: Matter) -> String {
-    let mut result = String::from("---\n");
+  /// Converts a &str -> Matter
+  pub fn from(content: &str) -> Result<Self, Error> {
+    serde_yaml::from_str(content).context(error::MatterSerialize)
+  }
 
-    if !matter.name.is_empty() {
-      result.push_str(&format!("name: {}\n", matter.name))
-    }
+  /// Converts a Matter -> String
+  pub fn into(matter: Matter) -> Result<String, Error> {
+    Ok(format!(
+      "{}---\n",
+      serde_yaml::to_string(&matter).context(error::MatterDeserialize)?
+    ))
+  }
+}
 
-    if !matter.tags.is_empty() {
-      result.push_str("tags:\n");
-      matter.tags.iter().for_each(|tag| {
-        result.push_str(&format!(" - {}\n", tag));
-      });
-    }
+#[cfg(test)]
+mod tests {
+  use super::*;
 
-    if !matter.links.is_empty() {
-      result.push_str("links:\n");
-      matter.links.iter().for_each(|link| {
-        result.push_str(&format!(" - {}\n", link));
-      });
-    }
+  fn setup() -> (Matter, String, String) {
+    let matter = Matter {
+      name:  String::from("123-a"),
+      tags:  Some(vec![String::from("software"), String::from("code")]),
+      links: Some(vec![String::from("b"), String::from("c")]),
+    };
 
-    format!("{}---\n", result)
+    // This is what we're serializing
+    let as_str = r#"
+      name: 123-a
+      tags:
+        - software
+        - code
+      links:
+        - b
+        - c
+      "#;
+
+    // This is what we want
+    let want = r#"
+      ---
+      name: 123-a
+      tags:
+        - software
+        - code
+      links:
+        - b
+        - c
+      ---
+      "#;
+
+    (
+      matter,
+      dedent(as_str.strip_prefix("\n").unwrap()),
+      dedent(want.strip_prefix("\n").unwrap()),
+    )
+  }
+
+  #[test]
+  fn from() {
+    let (matter, _, want) = setup();
+    let res = Matter::into(matter).unwrap();
+    assert_eq!(res, want);
+  }
+
+  #[test]
+  fn to_string() {
+    let (matter, as_str, _) = setup();
+    let res: Matter = Matter::from(as_str.as_str()).unwrap();
+    assert_eq!(res, matter);
   }
 }

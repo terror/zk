@@ -23,24 +23,30 @@ impl SkimItem for Note {
 }
 
 impl Note {
-  pub fn new(path: PathBuf) -> Self {
+  pub fn new(path: PathBuf) -> Result<Self, Error> {
     let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
 
     let (matter, content) = matter::matter(&fs::read_to_string(&path).unwrap()).unwrap();
 
-    let matter = Matter::from(matter.as_str());
+    let matter = Matter::from(matter.as_str())?;
 
-    Self {
+    Ok(Self {
       id,
       path,
       matter,
       content,
-    }
+    })
   }
 
   /// Checks if a link exists between the current note and `name`.
   pub fn has_link(&self, name: &str) -> bool {
-    if self.matter.links.contains(&name.to_owned()) {
+    if self
+      .matter
+      .links
+      .clone()
+      .unwrap_or_default()
+      .contains(&name.to_owned())
+    {
       return true;
     }
     false
@@ -48,7 +54,13 @@ impl Note {
 
   /// Checks if a tag `name` exists within this notes tags.
   pub fn has_tag(&self, name: &str) -> bool {
-    if self.matter.tags.contains(&name.to_owned()) {
+    if self
+      .matter
+      .tags
+      .clone()
+      .unwrap_or_default()
+      .contains(&name.to_owned())
+    {
       return true;
     }
     false
@@ -71,6 +83,8 @@ impl Note {
     let mut new = self
       .matter
       .links
+      .clone()
+      .unwrap_or_default()
       .iter()
       .map(|link| link.to_owned())
       .collect::<Vec<String>>();
@@ -81,17 +95,17 @@ impl Note {
 
     file
       .write_all(
-        &Matter::into_string(Matter {
-          links: new,
+        &Matter::into(Matter {
+          links: Some(new),
           ..self.matter.clone()
-        })
+        })?
         .as_bytes(),
       )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(Note::new(self.path.to_owned()))
+    Note::new(self.path.to_owned())
   }
 
   /// Attempts to remove `name` as a link from the current note.
@@ -111,6 +125,8 @@ impl Note {
     let new = self
       .matter
       .links
+      .clone()
+      .unwrap_or_default()
       .iter()
       .filter(|link| *link != name)
       .map(|link| link.to_owned())
@@ -120,17 +136,17 @@ impl Note {
 
     file
       .write_all(
-        &Matter::into_string(Matter {
-          links: new,
+        &Matter::into(Matter {
+          links: Some(new),
           ..self.matter.clone()
-        })
+        })?
         .as_bytes(),
       )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(Note::new(self.path.to_owned()))
+    Note::new(self.path.to_owned())
   }
 
   /// Attempts to add `name` as a tag to the current note.
@@ -150,6 +166,8 @@ impl Note {
     let mut new = self
       .matter
       .tags
+      .clone()
+      .unwrap_or_default()
       .iter()
       .map(|tag| tag.to_owned())
       .collect::<Vec<String>>();
@@ -160,17 +178,17 @@ impl Note {
 
     file
       .write_all(
-        &Matter::into_string(Matter {
-          tags: new,
+        &Matter::into(Matter {
+          tags: Some(new),
           ..self.matter.clone()
-        })
+        })?
         .as_bytes(),
       )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(Note::new(self.path.to_owned()))
+    Note::new(self.path.to_owned())
   }
 
   /// Attempts to remove `name` as a tag from the current note.
@@ -190,6 +208,8 @@ impl Note {
     let new = self
       .matter
       .tags
+      .clone()
+      .unwrap_or_default()
       .iter()
       .filter(|tag| *tag != name)
       .map(|tag| tag.to_owned())
@@ -199,17 +219,17 @@ impl Note {
 
     file
       .write_all(
-        &Matter::into_string(Matter {
-          tags: new,
+        &Matter::into(Matter {
+          tags: Some(new),
           ..self.matter.clone()
-        })
+        })?
         .as_bytes(),
       )
       .unwrap();
 
     file.write_all(&self.content.as_bytes()).unwrap();
 
-    Ok(Note::new(self.path.to_owned()))
+    Note::new(self.path.to_owned())
   }
 }
 

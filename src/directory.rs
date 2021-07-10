@@ -35,7 +35,7 @@ impl Directory {
             == self.ext
       })
       .for_each(|entry| {
-        notes.push(Note::new(entry));
+        notes.push(Note::new(entry).unwrap());
       });
 
     Ok(notes)
@@ -69,7 +69,14 @@ impl Directory {
     let ret = &self
       .notes()?
       .iter()
-      .filter(|note| note.matter.tags.contains(&tag.to_string()))
+      .filter(|note| {
+        note
+          .matter
+          .tags
+          .clone()
+          .unwrap_or_default()
+          .contains(&tag.to_string())
+      })
       .cloned()
       .collect::<Vec<Note>>();
 
@@ -90,7 +97,14 @@ impl Directory {
     let ret = &self
       .notes()?
       .iter()
-      .filter(|note| note.matter.links.contains(&name.to_string()))
+      .filter(|note| {
+        note
+          .matter
+          .links
+          .clone()
+          .unwrap_or_default()
+          .contains(&name.to_string())
+      })
       .cloned()
       .collect::<Vec<Note>>();
 
