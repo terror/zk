@@ -31,7 +31,7 @@ pub(crate) use crate::error;
 
 // test crates
 #[cfg(test)]
-pub use tempfile::TempDir;
+pub use {tempfile::TempDir, textwrap::dedent};
 
 // structs and enums
 pub use crate::{
