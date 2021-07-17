@@ -1,13 +1,13 @@
 use crate::common::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Matter {
   pub name:  String,
   pub tags:  Vec<String>,
   pub links: Vec<String>,
 }
 
-/// Attempts to turn the str `content` into `Matter` struct with the
+/// Attempts to turn the str `content` into a `Matter` struct with the
 /// appropriate fields.
 impl From<&str> for Matter {
   fn from(content: &str) -> Self {
@@ -60,5 +60,97 @@ impl Matter {
     }
 
     format!("{}---\n", result)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn cases() -> Vec<(Matter, String)> {
+    vec![
+      (
+        Matter {
+          name:  "a".into(),
+          tags:  vec![String::from("code"), String::from("software")],
+          links: vec![String::from("b"), String::from("c")],
+        },
+        r#"
+        ---
+        name: a
+        tags:
+         - code
+         - software
+        links:
+         - b
+         - c
+        ---
+      "#
+        .into(),
+      ),
+      (
+        Matter {
+          name:  "b".into(),
+          tags:  vec![],
+          links: vec![String::from("b"), String::from("c")],
+        },
+        r#"
+        ---
+        name: b
+        links:
+         - b
+         - c
+        ---
+      "#
+        .into(),
+      ),
+      (
+        Matter {
+          name:  "c".into(),
+          tags:  vec![String::from("code"), String::from("software")],
+          links: vec![],
+        },
+        r#"
+        ---
+        name: c
+        tags:
+         - code
+         - software
+        ---
+      "#
+        .into(),
+      ),
+      (
+        Matter {
+          name:  "d".into(),
+          tags:  vec![],
+          links: vec![],
+        },
+        r#"
+        ---
+        name: d
+        ---
+      "#
+        .into(),
+      ),
+    ]
+  }
+
+  fn strip(s: String) -> String {
+    dedent(s.strip_prefix("\n").unwrap())
+  }
+
+  #[test]
+  fn serialize() {
+    for (have, want) in cases() {
+      assert_eq!(Matter::into_string(have), strip(want));
+    }
+  }
+
+  #[test]
+  fn deserialize() {
+    for (want, have) in cases() {
+      assert_eq!(Matter::from(strip(have).as_str()), want);
+    }
   }
 }
