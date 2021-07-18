@@ -1,5 +1,6 @@
 use crate::common::*;
 
+#[cfg(test)]
 #[macro_use]
 mod test_utils;
 
