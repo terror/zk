@@ -1,4 +1,3 @@
-#[cfg(test)]
 use crate::common::*;
 
 #[macro_export]
@@ -12,7 +11,6 @@ macro_rules! in_temp_dir {
   };
 }
 
-#[cfg(test)]
 pub fn create(note_id: &NoteId) -> Result<Note, Error> {
   let path = env::current_dir().unwrap().join(&note_id.to_string());
 
@@ -25,7 +23,6 @@ pub fn create(note_id: &NoteId) -> Result<Note, Error> {
   Ok(Note::new(path))
 }
 
-#[cfg(test)]
 pub fn sleep() {
   thread::sleep(time::Duration::from_millis(1000));
 }
