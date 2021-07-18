@@ -3,6 +3,7 @@
 <img align="right" width="225" height="120" src="./assets/zk.png">
 
 [![Build](https://github.com/terror/zk/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/terror/zk/actions/workflows/build.yaml)
+[![crates.io](https://shields.io/crates/v/zkt.svg)](https://crates.io/crates/zkt)
 
 A note-taking tool based on the famous *Zettelkasten* method with support for
 fuzzy searching, tags & link exploration, in Rust!
