@@ -305,4 +305,56 @@ impl Handler {
 
     Ok(())
   }
+
+  /// Rename a note
+  ///
+  /// Note:
+  ///   this will run through each Zettelkasten note
+  ///   and ensure that the links are updated to accomodate
+  ///   this name change.
+  pub fn rename(&self, note: &str, name: &str) -> Result<(), Error> {
+    let candidates = self.directory.find(note)?;
+
+    // if there's only one candidate note, rename the note, change all
+    // references to the note and return
+    if candidates.len() == 1 {
+      let candidate = candidates.first().unwrap();
+
+      let id = &candidate.id.to_string();
+
+      let new_id = &candidate.id.update(name);
+
+      for note in self.directory.notes()? {
+        if note.has_link(id) {
+          note.remove_link(id)?;
+          note.add_link(new_id)?;
+        }
+      }
+
+      // rename the file on disk
+      candidate.rename(&self.directory.path, NoteId::new(name, &candidate.id.ext))?;
+
+      return Ok(());
+    }
+
+    // rename each selected note with `name`, and change each
+    // reference to the note
+    for note in Search::new(candidates).run()? {
+      let id = &note.id.to_string();
+
+      let new_id = &note.id.update(name);
+
+      for note in self.directory.notes()? {
+        if note.has_link(id) {
+          note.remove_link(id)?;
+          note.add_link(new_id)?;
+        }
+      }
+
+      // rename the file on disk
+      note.rename(&self.directory.path, NoteId::new(name, &note.id.ext))?;
+    }
+
+    Ok(())
+  }
 }

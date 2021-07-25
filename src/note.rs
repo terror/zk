@@ -211,6 +211,14 @@ impl Note {
 
     Ok(Note::new(self.path.to_owned()))
   }
+
+  /// Attempts to rename the current notes file on disk
+  pub fn rename(&self, path: &Path, id: NoteId) -> Result<Note, Error> {
+    // need path/to/id.md -> path/to/new-id.md
+    let new_path = &path.join(id.to_string());
+    fs::rename(&self.path, new_path).context(error::Io)?;
+    Ok(Note::new(new_path.to_owned()))
+  }
 }
 
 #[cfg(test)]
@@ -275,6 +283,21 @@ mod tests {
 
       let a = a.remove_tag("software").unwrap();
       assert!(!a.has_tag("software"));
+    });
+  }
+
+  #[test]
+  fn test_rename() {
+    in_temp_dir!({
+      let a = create(&NoteId::new("a", "md")).unwrap();
+
+      let b = a
+        .rename(&env::current_dir().unwrap(), NoteId::new("b", "md"))
+        .unwrap();
+
+      assert_eq!(b.id.prefix, a.id.prefix);
+      assert_eq!(b.id.name, "b");
+      assert_eq!(b.id.ext, a.id.ext);
     });
   }
 }
