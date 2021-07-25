@@ -48,6 +48,11 @@ impl NoteId {
       ext:    ext.to_owned(),
     })
   }
+
+  /// Replaces the current `name` with `name` and returns the result.
+  pub fn update(&self, name: &str) -> String {
+    format!("{}-{}.{}", self.prefix, name, self.ext)
+  }
 }
 
 #[cfg(test)]
@@ -73,6 +78,21 @@ mod tests {
       assert_eq!(id.prefix, prefix);
       assert_eq!(id.name, name);
       assert_eq!(id.ext, ext);
+    }
+  }
+
+  #[test]
+  fn test_update() {
+    let cases = vec![
+      ("123-a.md", "b", "123-b.md"),
+      ("93048-name.md", "new-name", "93048-new-name.md"),
+    ];
+
+    for case in cases {
+      let (curr, new, want) = case;
+      let id = NoteId::parse(curr).unwrap();
+      let have = id.update(new);
+      assert_eq!(have, want);
     }
   }
 }

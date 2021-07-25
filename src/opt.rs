@@ -46,6 +46,10 @@ pub enum Opt {
   #[structopt(name = "explore", alias = "e")]
   /// Explore note links
   Explore { name: String },
+
+  #[structopt(name = "rename", alias = "re")]
+  /// Rename a note
+  Rename { note: String, name: String },
 }
 
 impl Opt {
@@ -69,6 +73,7 @@ impl Opt {
       Opt::Tag { name, tag } => handler.tag(&name, &tag)?,
       Opt::RemoveTag { name, tag } => handler.remove_tag(&name, &tag)?,
       Opt::Explore { name } => handler.explore(&name)?,
+      Opt::Rename { note, name } => handler.rename(&note, &name)?,
     }
 
     Ok(())
