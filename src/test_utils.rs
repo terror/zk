@@ -11,16 +11,11 @@ macro_rules! in_temp_dir {
   };
 }
 
-pub fn create(note_id: &NoteId) -> Result<Note, Error> {
+pub fn create_note(note_id: &NoteId) -> Note {
   let path = env::current_dir().unwrap().join(&note_id.to_string());
-
-  let mut file = File::create(&path).context(error::Io)?;
-
-  file
-    .write_all(&Matter::default(&note_id.name))
-    .context(error::Io)?;
-
-  Ok(Note::new(path))
+  let mut file = File::create(&path).unwrap();
+  file.write_all(&Matter::default(&note_id.name)).unwrap();
+  Note::new(path)
 }
 
 pub fn sleep() {

@@ -11,7 +11,7 @@ pub struct Matter {
 /// appropriate fields.
 impl From<&str> for Matter {
   fn from(content: &str) -> Self {
-    let matter = YamlLoader::load_from_str(&content).unwrap()[0].clone();
+    let matter = YamlLoader::load_from_str(content).unwrap()[0].clone();
 
     let name = matter["name"].as_str().unwrap_or(&String::new()).to_owned();
 
@@ -137,7 +137,7 @@ mod tests {
   }
 
   fn strip(s: String) -> String {
-    dedent(s.strip_prefix("\n").unwrap())
+    dedent(s.strip_prefix('\n').unwrap())
   }
 
   #[test]

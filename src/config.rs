@@ -27,7 +27,7 @@ impl Config {
   fn path() -> Result<Option<PathBuf>, Error> {
     Ok(
       xdg::BaseDirectories::with_prefix(dirs::home_dir().unwrap())
-        .context(error::BaseDirectoriesError)?
+        .context(error::BaseDirectories)?
         .find_config_file(Self::filename()),
     )
   }
