@@ -17,7 +17,7 @@ impl Directory {
     let mut notes = Vec::new();
 
     if !&self.path.exists() {
-      return Err(error::Error::PathError {
+      return Err(error::Error::Path {
         path: self.path.to_owned(),
       });
     }
@@ -106,14 +106,13 @@ impl Directory {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::test_utils::{create, sleep};
 
   #[test]
   fn test_notes() {
     in_temp_dir!({
-      create(&NoteId::new("a", "md")).unwrap();
-      create(&NoteId::new("b", "md")).unwrap();
-      create(&NoteId::new("c", "md")).unwrap();
+      create_note(&NoteId::new("a", "md"));
+      create_note(&NoteId::new("b", "md"));
+      create_note(&NoteId::new("c", "md"));
 
       let directory = Directory::new(env::current_dir().unwrap(), String::from("md"));
       let notes = directory.notes().unwrap();
@@ -127,7 +126,7 @@ mod tests {
     in_temp_dir!({
       // create 5 notes with name `a`
       for _ in 0..5 {
-        create(&NoteId::new("a", "md")).unwrap();
+        create_note(&NoteId::new("a", "md"));
         sleep();
       }
 
@@ -145,8 +144,8 @@ mod tests {
   #[test]
   fn test_find_by_tag() {
     in_temp_dir!({
-      let a = create(&NoteId::new("a", "md")).unwrap();
-      let b = create(&NoteId::new("b", "md")).unwrap();
+      let a = create_note(&NoteId::new("a", "md"));
+      let b = create_note(&NoteId::new("b", "md"));
 
       a.add_tag("software").unwrap();
       b.add_tag("software").unwrap();

@@ -14,24 +14,26 @@ pub use std::{
 };
 
 // dependencies
-pub use chrono::prelude::*;
-pub use colored::{Colorize, *};
-pub use matter;
-pub use serde::{Deserialize, Serialize};
-pub use shellexpand;
-pub use skim::prelude::*;
-pub use snafu::{ResultExt, Snafu};
-pub use structopt::StructOpt;
-pub use toml;
-pub use walkdir::WalkDir;
-pub use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
+pub use {
+  chrono::prelude::*,
+  colored::{Colorize, *},
+  matter,
+  serde::{Deserialize, Serialize},
+  shellexpand,
+  skim::prelude::*,
+  snafu::{ResultExt, Snafu},
+  structopt::StructOpt,
+  toml,
+  walkdir::WalkDir,
+  yaml_rust::{Yaml, YamlEmitter, YamlLoader},
+};
 
 // modules
 pub(crate) use crate::error;
 
 // test crates
 #[cfg(test)]
-pub use {tempfile::TempDir, textwrap::dedent};
+pub use {crate::test_utils::*, tempfile::TempDir, textwrap::dedent};
 
 // structs and enums
 pub use crate::{

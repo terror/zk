@@ -18,19 +18,19 @@ path = "src/main.rs"
 [dependencies]
 chrono      = "0.4.19"
 colored     = "2.0.0"
-dirs        = "3.0.2"
+dirs        = "4.0.0"
 matter      = "0.1.0-alpha4"
 shellexpand = "2.1.0"
 skim        = "0.9.4"
 snafu       = "0.6.10"
-structopt   = "0.3.0"
+structopt   = "0.3.25"
 toml        = "0.5.8"
 walkdir     = "2.3.2"
-xdg         = "2.2.0"
+xdg         = "2.4.0"
 yaml-rust   = "0.4.5"
 
 [dependencies.serde]
-version  = "1.0.0"
+version  = "1.0.130"
 features = ["derive"]
 
 [dev-dependencies]

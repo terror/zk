@@ -20,10 +20,9 @@ impl Handler {
         .directory
         .path
         .join(NoteId::new(name, &self.config.ext).to_string()),
-    )
-    .context(error::Io)?;
+    )?;
 
-    file.write_all(&Matter::default(name)).context(error::Io)?;
+    file.write_all(&Matter::default(name))?;
 
     self.open(name)?;
 
@@ -40,19 +39,13 @@ impl Handler {
     // if there's only one candidate note, open it and return
     if candidates.len() == 1 {
       let note = candidates.first().unwrap();
-      Command::new(&self.config.editor)
-        .arg(&note.path)
-        .status()
-        .context(error::Io)?;
+      Command::new(&self.config.editor).arg(&note.path).status()?;
       return Ok(());
     }
 
     // try to open all candidate notes
     for note in Search::new(candidates).run()? {
-      Command::new(&self.config.editor)
-        .arg(&note.path)
-        .status()
-        .context(error::Io)?;
+      Command::new(&self.config.editor).arg(&note.path).status()?;
     }
 
     Ok(())
@@ -100,10 +93,7 @@ impl Handler {
     let candidates = self.directory.find_by_tag(tag)?;
 
     for note in Search::new(candidates).run()? {
-      Command::new(&self.config.editor)
-        .arg(&note.path)
-        .status()
-        .context(error::Io)?;
+      Command::new(&self.config.editor).arg(&note.path).status()?;
     }
 
     Ok(())
@@ -113,10 +103,7 @@ impl Handler {
   /// Powered by `skim` --> https://github.com/lotabout/skim
   pub fn search(&self) -> Result<(), Error> {
     for note in Search::new(self.directory.notes()?).run()? {
-      Command::new(&self.config.editor)
-        .arg(&note.path)
-        .status()
-        .context(error::Io)?;
+      Command::new(&self.config.editor).arg(&note.path).status()?;
     }
     Ok(())
   }

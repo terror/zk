@@ -77,19 +77,17 @@ impl Note {
 
     new.push(name.to_string());
 
-    let mut file = File::create(&self.path).unwrap();
+    let mut file = File::create(&self.path)?;
 
-    file
-      .write_all(
-        &Matter::into_string(Matter {
-          links: new,
-          ..self.matter.clone()
-        })
-        .as_bytes(),
-      )
-      .unwrap();
+    file.write_all(
+      Matter::into_string(Matter {
+        links: new,
+        ..self.matter.clone()
+      })
+      .as_bytes(),
+    )?;
 
-    file.write_all(&self.content.as_bytes()).unwrap();
+    file.write_all(self.content.as_bytes())?;
 
     Ok(Note::new(self.path.to_owned()))
   }
@@ -116,19 +114,17 @@ impl Note {
       .map(|link| link.to_owned())
       .collect::<Vec<String>>();
 
-    let mut file = File::create(&self.path).unwrap();
+    let mut file = File::create(&self.path)?;
 
-    file
-      .write_all(
-        &Matter::into_string(Matter {
-          links: new,
-          ..self.matter.clone()
-        })
-        .as_bytes(),
-      )
-      .unwrap();
+    file.write_all(
+      Matter::into_string(Matter {
+        links: new,
+        ..self.matter.clone()
+      })
+      .as_bytes(),
+    )?;
 
-    file.write_all(&self.content.as_bytes()).unwrap();
+    file.write_all(self.content.as_bytes())?;
 
     Ok(Note::new(self.path.to_owned()))
   }
@@ -156,19 +152,17 @@ impl Note {
 
     new.push(name.to_string());
 
-    let mut file = File::create(&self.path).unwrap();
+    let mut file = File::create(&self.path)?;
 
-    file
-      .write_all(
-        &Matter::into_string(Matter {
-          tags: new,
-          ..self.matter.clone()
-        })
-        .as_bytes(),
-      )
-      .unwrap();
+    file.write_all(
+      Matter::into_string(Matter {
+        tags: new,
+        ..self.matter.clone()
+      })
+      .as_bytes(),
+    )?;
 
-    file.write_all(&self.content.as_bytes()).unwrap();
+    file.write_all(self.content.as_bytes())?;
 
     Ok(Note::new(self.path.to_owned()))
   }
@@ -199,7 +193,7 @@ impl Note {
 
     file
       .write_all(
-        &Matter::into_string(Matter {
+        Matter::into_string(Matter {
           tags: new,
           ..self.matter.clone()
         })
@@ -207,7 +201,7 @@ impl Note {
       )
       .unwrap();
 
-    file.write_all(&self.content.as_bytes()).unwrap();
+    file.write_all(self.content.as_bytes())?;
 
     Ok(Note::new(self.path.to_owned()))
   }
@@ -216,12 +210,11 @@ impl Note {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::test_utils::create;
 
   #[test]
   fn test_add_link() {
     in_temp_dir!({
-      let a = create(&NoteId::new("a", "md")).unwrap();
+      let a = create_note(&NoteId::new("a", "md"));
       let link = NoteId::new("b", "md").to_string();
 
       let a = a.remove_link(&link).unwrap();
@@ -235,7 +228,7 @@ mod tests {
   #[test]
   fn test_add_tag() {
     in_temp_dir!({
-      let a = create(&NoteId::new("a", "md")).unwrap();
+      let a = create_note(&NoteId::new("a", "md"));
 
       let a = a.remove_tag("software").unwrap();
       assert!(!a.has_tag("software"));
@@ -248,7 +241,7 @@ mod tests {
   #[test]
   fn test_remove_link() {
     in_temp_dir!({
-      let a = create(&NoteId::new("a", "md")).unwrap();
+      let a = create_note(&NoteId::new("a", "md"));
       let link = NoteId::new("b", "md").to_string();
 
       let a = a.remove_link(&link).unwrap();
@@ -265,7 +258,7 @@ mod tests {
   #[test]
   fn test_remove_tag() {
     in_temp_dir!({
-      let a = create(&NoteId::new("a", "md")).unwrap();
+      let a = create_note(&NoteId::new("a", "md"));
 
       let a = a.remove_tag("software").unwrap();
       assert!(!a.has_tag("software"));

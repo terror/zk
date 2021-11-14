@@ -7,10 +7,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 #[snafu(visibility(pub(crate)))]
 pub enum Error {
   #[snafu(display("Unable to load configuration from {}: {}", path.display(), source))]
-  LoadConfig {
-    source: io::Error,
-    path:   PathBuf,
-  },
+  LoadConfig { source: io::Error, path: PathBuf },
 
   #[snafu(display(
     "Failed to Deserialize TOML configuration located at `{}`. Are you missing a configuration \
@@ -22,9 +19,7 @@ pub enum Error {
   },
 
   #[snafu(display("Unable to fetch base directory."))]
-  BaseDirectoriesError {
-    source: xdg::BaseDirectoriesError,
-  },
+  BaseDirectories { source: xdg::BaseDirectoriesError },
 
   #[snafu(display("Failed to load environment variable: {}.", var))]
   Env {
@@ -33,29 +28,20 @@ pub enum Error {
   },
 
   #[snafu(display("Note with name `{}` does not exist.", name))]
-  NoteNotFound {
-    name: String,
-  },
+  NoteNotFound { name: String },
 
   #[snafu(display("No note with tag `{}` exists.", tag))]
-  TagNotFound {
-    tag: String,
-  },
+  TagNotFound { tag: String },
 
   #[snafu(display("No note contains a link to `{}`.", name))]
-  LinkNotFound {
-    name: String,
-  },
+  LinkNotFound { name: String },
 
   #[snafu(display("No note was selected."))]
   NoteNotSelected,
 
   #[snafu(display("Path `{}` does not exist.", path.display()))]
-  PathError {
-    path: PathBuf,
-  },
+  Path { path: PathBuf },
 
-  Io {
-    source: io::Error,
-  },
+  #[snafu(context(false), display("IO Error: {}", source))]
+  Io { source: io::Error },
 }

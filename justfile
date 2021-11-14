@@ -1,6 +1,9 @@
 default:
 	just --list
 
+alias r := run
+alias f := fmt
+
 ci: build test clippy fmt-check
 
 build:
