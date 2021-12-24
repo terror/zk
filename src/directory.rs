@@ -1,19 +1,18 @@
 use crate::common::*;
 
 #[derive(Debug)]
-pub struct Directory {
-  pub path: PathBuf,
-  pub ext:  String,
+pub(crate) struct Directory {
+  pub(crate) path: PathBuf,
 }
 
 impl Directory {
-  pub fn new(path: PathBuf, ext: String) -> Self {
-    Self { path, ext }
+  pub(crate) fn new(path: PathBuf) -> Self {
+    Self { path }
   }
 
   /// Constructs a `Vec<Note>` based on a the directories path. This attempts to
-  /// convert each instance of a file with extension `ext` into a `Note`.
-  pub fn notes(&self) -> Result<Vec<Note>, Error> {
+  /// convert each instance of a file with extension `md` into a `Note`.
+  pub fn notes(&self) -> Result<Vec<Note>> {
     let mut notes = Vec::new();
 
     if !&self.path.exists() {
@@ -25,15 +24,7 @@ impl Directory {
     WalkDir::new(&self.path)
       .into_iter()
       .map(|entry| entry.unwrap().into_path())
-      .filter(|entry| {
-        entry.is_file()
-          && entry
-            .extension()
-            .unwrap_or_else(|| OsStr::new(""))
-            .to_str()
-            .unwrap()
-            == self.ext
-      })
+      .filter(|entry| entry.is_file())
       .for_each(|entry| {
         notes.push(Note::new(entry));
       });
@@ -45,7 +36,7 @@ impl Directory {
   /// matches `name`. This method either returns a list of `Note` instances
   /// who meet this criteria or `None`, indicating that the criteria was
   /// not met.
-  pub fn find(&self, name: &str) -> Result<Vec<Note>, Error> {
+  pub(crate) fn find(&self, name: &str) -> Result<Vec<Note>> {
     let ret = &self
       .notes()?
       .iter()
@@ -65,7 +56,7 @@ impl Directory {
   /// list of tags contains the value `tag`. This method either returns a list
   /// of `Note` instances who meet this criteria or `None`, indicating
   /// that the criteria was not met.
-  pub fn find_by_tag(&self, tag: &str) -> Result<Vec<Note>, Error> {
+  pub(crate) fn find_by_tag(&self, tag: &str) -> Result<Vec<Note>> {
     let ret = &self
       .notes()?
       .iter()
@@ -80,27 +71,6 @@ impl Directory {
       _ => Ok(ret.to_vec()),
     }
   }
-
-  /// Finds all notes that reside within this directories `path` whose
-  /// list of links contains the value `name`. This method either returns a list
-  /// of `Note` instances who meet this criteria or `None`, indicating
-  /// that the criteria was not met.
-  #[allow(dead_code)]
-  pub fn find_by_link(&self, name: &str) -> Result<Vec<Note>, Error> {
-    let ret = &self
-      .notes()?
-      .iter()
-      .filter(|note| note.matter.links.contains(&name.to_string()))
-      .cloned()
-      .collect::<Vec<Note>>();
-
-    match ret.len() {
-      0 => Err(error::Error::LinkNotFound {
-        name: name.to_owned(),
-      }),
-      _ => Ok(ret.to_vec()),
-    }
-  }
 }
 
 #[cfg(test)]
@@ -108,13 +78,13 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_notes() {
+  fn notes() {
     in_temp_dir!({
-      create_note(&NoteId::new("a", "md"));
-      create_note(&NoteId::new("b", "md"));
-      create_note(&NoteId::new("c", "md"));
+      create_note(&NoteId::new("a"));
+      create_note(&NoteId::new("b"));
+      create_note(&NoteId::new("c"));
 
-      let directory = Directory::new(env::current_dir().unwrap(), String::from("md"));
+      let directory = Directory::new(env::current_dir().unwrap());
       let notes = directory.notes().unwrap();
 
       assert_eq!(notes.len(), 3);
@@ -122,15 +92,14 @@ mod tests {
   }
 
   #[test]
-  fn test_find() {
+  fn find() {
     in_temp_dir!({
-      // create 5 notes with name `a`
       for _ in 0..5 {
-        create_note(&NoteId::new("a", "md"));
+        create_note(&NoteId::new("a"));
         sleep();
       }
 
-      let directory = Directory::new(env::current_dir().unwrap(), String::from("md"));
+      let directory = Directory::new(env::current_dir().unwrap());
       let notes = directory.find("a").unwrap();
 
       assert_eq!(notes.len(), 5);
@@ -142,15 +111,15 @@ mod tests {
   }
 
   #[test]
-  fn test_find_by_tag() {
+  fn find_by_tag() {
     in_temp_dir!({
-      let a = create_note(&NoteId::new("a", "md"));
-      let b = create_note(&NoteId::new("b", "md"));
+      let mut a = create_note(&NoteId::new("a"));
+      let mut b = create_note(&NoteId::new("b"));
 
       a.add_tag("software").unwrap();
       b.add_tag("software").unwrap();
 
-      let directory = Directory::new(env::current_dir().unwrap(), String::from("md"));
+      let directory = Directory::new(env::current_dir().unwrap());
       let notes = directory.find_by_tag("software").unwrap();
 
       assert_eq!(notes.len(), 2);

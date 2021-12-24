@@ -1,10 +1,10 @@
 use crate::common::*;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Matter {
-  pub name:  String,
-  pub tags:  Vec<String>,
-  pub links: Vec<String>,
+pub(crate) struct Matter {
+  pub(crate) name:  String,
+  pub(crate) tags:  Vec<String>,
+  pub(crate) links: Vec<String>,
 }
 
 /// Attempts to turn the str `content` into a `Matter` struct with the
@@ -34,11 +34,11 @@ impl From<&str> for Matter {
 }
 
 impl Matter {
-  pub fn default(name: &str) -> Vec<u8> {
+  pub(crate) fn default(name: &str) -> Vec<u8> {
     format!("---\nname: {}\n---\n", &name).as_bytes().to_owned()
   }
 
-  pub fn into_string(matter: Matter) -> String {
+  pub(crate) fn into_string(matter: Matter) -> String {
     let mut result = String::from("---\n");
 
     if !matter.name.is_empty() {

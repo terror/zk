@@ -1,6 +1,6 @@
 [package]
 name        = "zkt"
-version     = "0.0.2"
+version     = "0.0.3"
 description = "A note-taking tool based on the famous Zettelkasten method"
 authors     = ["Liam <liam@scalzulli.com>"]
 license     = "CC0-1.0"
@@ -19,6 +19,7 @@ path = "src/main.rs"
 chrono      = "0.4.19"
 colored     = "2.0.0"
 dirs        = "4.0.0"
+indoc       = "1.0.3"
 matter      = "0.1.0-alpha4"
 shellexpand = "2.1.0"
 skim        = "0.9.4"
@@ -34,5 +35,6 @@ version  = "1.0.130"
 features = ["derive"]
 
 [dev-dependencies]
-tempfile = "3.2.0"
-textwrap = "0.14.2"
+pretty_assertions = "1.0.0"
+tempfile          = "3.2.0"
+textwrap          = "0.14.2"

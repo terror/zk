@@ -1,17 +1,17 @@
 use crate::common::*;
 
-pub struct Search {
+pub(crate) struct Search {
   items: Vec<Note>,
 }
 
 impl Search {
-  pub fn new(items: Vec<Note>) -> Self {
+  pub(crate) fn new(items: Vec<Note>) -> Self {
     Self { items }
   }
 
   /// This method launches a `skim` fuzzy search with `items` and
   /// returns the selected items as their original type.
-  pub fn run(&self) -> Result<Vec<Note>, Error> {
+  pub(crate) fn run(&self) -> Result<Vec<Note>, Error> {
     if self.items.len() == 1 {
       return Ok(self.items.clone());
     }

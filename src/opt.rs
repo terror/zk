@@ -2,7 +2,7 @@ use crate::common::*;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "zk")]
-pub enum Opt {
+pub(crate) enum Opt {
   #[structopt(name = "new", alias = "n")]
   /// Create a new note
   New { name: String },
@@ -49,13 +49,10 @@ pub enum Opt {
 }
 
 impl Opt {
-  pub fn run(self) -> Result<(), Error> {
+  pub(crate) fn run(self) -> Result<(), Error> {
     let config = Config::load()?;
 
-    let handler = Handler::new(
-      config.clone(),
-      Directory::new(config.path.expand(), config.ext),
-    );
+    let handler = Handler::new(config.clone(), Directory::new(config.path.expand()));
 
     match self {
       Opt::New { name } => handler.create(&name)?,

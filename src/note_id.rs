@@ -7,8 +7,8 @@ pub struct NoteId {
   pub ext:    String,
 }
 
-impl fmt::Display for NoteId {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for NoteId {
+  fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
     write!(f, "{}-{}.{}", self.prefix, self.name, self.ext)
   }
 }
@@ -16,23 +16,16 @@ impl fmt::Display for NoteId {
 impl NoteId {
   /// Generates a `NoteId` using the passed in `name` and a naive UTC
   /// datetime timestamp.
-  pub fn new(name: &str, ext: &str) -> Self {
-    let now = chrono::Utc::now();
+  pub fn new(name: &str) -> Self {
     Self {
       name:   name.to_owned(),
-      prefix: now.naive_utc().timestamp().to_string(),
-      ext:    ext.to_owned(),
+      prefix: chrono::Utc::now().naive_utc().timestamp().to_string(),
+      ext:    "md".to_owned(),
     }
   }
 
-  /// Essentially just splits a filename on `-` and attempts to
+  /// Splits a filename on `-` and attempts to
   /// return a valid `NoteId` based on the resulting parts.
-  ///
-  /// A proper note name should be of the form
-  /// `{prefix}-{name}.{extension}`.
-  ///
-  /// This method cuts off anything after the last `.` when considering a
-  /// note id string.
   pub fn parse(filename: &str) -> Option<Self> {
     let ext = Path::new(filename)
       .extension()
@@ -55,7 +48,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_parse() {
+  fn parse() {
     let cases = vec![
       ("123-a", "123", "a", ""),
       ("123-a.md", "123", "a", "md"),

@@ -1,15 +1,15 @@
 use crate::common::*;
 
 #[derive(Debug, Clone)]
-pub struct Note {
+pub(crate) struct Note {
   /// The notes timestamp prefix and name.
-  pub id:      NoteId,
+  pub(crate) id:      NoteId,
   /// Where the note is currently stored.
-  pub path:    PathBuf,
+  pub(crate) path:    PathBuf,
   /// Yaml frontmatter.
-  pub matter:  Matter,
+  pub(crate) matter:  Matter,
   /// The notes content as a String.
-  pub content: String,
+  pub(crate) content: String,
 }
 
 impl SkimItem for Note {
@@ -23,7 +23,7 @@ impl SkimItem for Note {
 }
 
 impl Note {
-  pub fn new(path: PathBuf) -> Self {
+  pub(crate) fn new(path: PathBuf) -> Self {
     let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
 
     let (matter, content) = matter::matter(&fs::read_to_string(&path).unwrap()).unwrap();
@@ -39,171 +39,47 @@ impl Note {
   }
 
   /// Checks if a link exists between the current note and `name`.
-  pub fn has_link(&self, name: &str) -> bool {
-    if self.matter.links.contains(&name.to_owned()) {
-      return true;
-    }
-    false
+  pub(crate) fn has_link(&self, name: &str) -> bool {
+    self.matter.links.contains(&name.to_string())
   }
 
   /// Checks if a tag `name` exists within this notes tags.
-  pub fn has_tag(&self, name: &str) -> bool {
-    if self.matter.tags.contains(&name.to_owned()) {
-      return true;
-    }
-    false
+  pub(crate) fn has_tag(&self, name: &str) -> bool {
+    self.matter.tags.contains(&name.to_string())
   }
 
   /// Attempts to add `name` as a link to the current note.
-  pub fn add_link(&self, name: &str) -> Result<Note, Error> {
-    if self.has_link(name) {
-      println!(
-        "{}",
-        format!(
-          "Note `{}` already contains a link to `{}`",
-          self.id.name, name
-        )
-        .yellow()
-      );
-      return Ok(self.clone());
-    }
-
-    let mut new = self
-      .matter
-      .links
-      .iter()
-      .map(|link| link.to_owned())
-      .collect::<Vec<String>>();
-
-    new.push(name.to_string());
-
-    let mut file = File::create(&self.path)?;
-
-    file.write_all(
-      Matter::into_string(Matter {
-        links: new,
-        ..self.matter.clone()
-      })
-      .as_bytes(),
-    )?;
-
-    file.write_all(self.content.as_bytes())?;
-
-    Ok(Note::new(self.path.to_owned()))
+  pub(crate) fn add_link(&mut self, name: &str) -> Result<Self> {
+    self.write(|note| note.matter.links.push(name.to_string()))
   }
 
   /// Attempts to remove `name` as a link from the current note.
-  pub fn remove_link(&self, name: &str) -> Result<Note, Error> {
-    if !self.has_link(name) {
-      println!(
-        "{}",
-        format!(
-          "Note `{}` does not contain a link to `{}`",
-          self.id.name, name
-        )
-        .yellow()
-      );
-      return Ok(self.clone());
-    }
-
-    let new = self
-      .matter
-      .links
-      .iter()
-      .filter(|link| *link != name)
-      .map(|link| link.to_owned())
-      .collect::<Vec<String>>();
-
-    let mut file = File::create(&self.path)?;
-
-    file.write_all(
-      Matter::into_string(Matter {
-        links: new,
-        ..self.matter.clone()
-      })
-      .as_bytes(),
-    )?;
-
-    file.write_all(self.content.as_bytes())?;
-
-    Ok(Note::new(self.path.to_owned()))
+  pub(crate) fn remove_link(&mut self, name: &str) -> Result<Self> {
+    self.write(|note| note.matter.links.retain(|link| link != name))
   }
 
   /// Attempts to add `name` as a tag to the current note.
-  pub fn add_tag(&self, name: &str) -> Result<Note, Error> {
-    if self.has_tag(name) {
-      println!(
-        "{}",
-        format!(
-          "Note `{}` already contains the tag `{}`.",
-          self.id.name, name
-        )
-        .red()
-      );
-      return Ok(self.clone());
-    }
-
-    let mut new = self
-      .matter
-      .tags
-      .iter()
-      .map(|tag| tag.to_owned())
-      .collect::<Vec<String>>();
-
-    new.push(name.to_string());
-
-    let mut file = File::create(&self.path)?;
-
-    file.write_all(
-      Matter::into_string(Matter {
-        tags: new,
-        ..self.matter.clone()
-      })
-      .as_bytes(),
-    )?;
-
-    file.write_all(self.content.as_bytes())?;
-
-    Ok(Note::new(self.path.to_owned()))
+  pub(crate) fn add_tag(&mut self, name: &str) -> Result<Self> {
+    self.write(|note| note.matter.tags.push(name.to_string()))
   }
 
   /// Attempts to remove `name` as a tag from the current note.
-  pub fn remove_tag(&self, name: &str) -> Result<Note, Error> {
-    if !self.has_tag(name) {
-      println!(
-        "{}",
-        format!(
-          "Note `{}` does not contain the tag `{}`.",
-          self.id.name, name
-        )
-        .red()
-      );
-      return Ok(self.clone());
-    }
+  pub(crate) fn remove_tag(&mut self, name: &str) -> Result<Self> {
+    self.write(|note| note.matter.tags.retain(|tag| tag != name))
+  }
 
-    let new = self
-      .matter
-      .tags
-      .iter()
-      .filter(|tag| *tag != name)
-      .map(|tag| tag.to_owned())
-      .collect::<Vec<String>>();
+  /// Remove this notes file on disk.
+  pub(crate) fn remove(&self) -> Result<()> {
+    Ok(fs::remove_file(&self.path)?)
+  }
 
-    let mut file = File::create(&self.path).unwrap();
-
-    file
-      .write_all(
-        Matter::into_string(Matter {
-          tags: new,
-          ..self.matter.clone()
-        })
-        .as_bytes(),
-      )
-      .unwrap();
-
+  /// Write this notes contents after performing an (optional) operation.
+  fn write<F: Fn(&mut Note)>(&mut self, f: F) -> Result<Self> {
+    f(self);
+    let mut file = File::create(&self.path)?;
+    file.write_all(Matter::into_string(self.matter.clone()).as_bytes())?;
     file.write_all(self.content.as_bytes())?;
-
-    Ok(Note::new(self.path.to_owned()))
+    Ok(self.to_owned())
   }
 }
 
@@ -212,61 +88,49 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_add_link() {
+  fn add_link() {
     in_temp_dir!({
-      let a = create_note(&NoteId::new("a", "md"));
-      let link = NoteId::new("b", "md").to_string();
+      let mut a = create_note(&NoteId::new("a"));
+      let link = NoteId::new("b").to_string();
 
-      let a = a.remove_link(&link).unwrap();
-      assert!(!a.has_link(&link));
-
-      let a = a.add_link(&link).unwrap();
+      a.add_link(&link).unwrap();
       assert!(a.has_link(&link));
     });
   }
 
   #[test]
-  fn test_add_tag() {
+  fn add_tag() {
     in_temp_dir!({
-      let a = create_note(&NoteId::new("a", "md"));
+      let mut a = create_note(&NoteId::new("a"));
 
-      let a = a.remove_tag("software").unwrap();
-      assert!(!a.has_tag("software"));
-
-      let a = a.add_tag("software").unwrap();
+      a.add_tag("software").unwrap();
       assert!(a.has_tag("software"));
     });
   }
 
   #[test]
-  fn test_remove_link() {
+  fn remove_link() {
     in_temp_dir!({
-      let a = create_note(&NoteId::new("a", "md"));
-      let link = NoteId::new("b", "md").to_string();
+      let mut a = create_note(&NoteId::new("a"));
+      let link = NoteId::new("b").to_string();
 
-      let a = a.remove_link(&link).unwrap();
-      assert!(!a.has_link(&link));
-
-      let a = a.add_link(&link).unwrap();
+      a.add_link(&link).unwrap();
       assert!(a.has_link(&link));
 
-      let a = a.remove_link(&link).unwrap();
+      a.remove_link(&link).unwrap();
       assert!(!a.has_link(&link));
     });
   }
 
   #[test]
-  fn test_remove_tag() {
+  fn remove_tag() {
     in_temp_dir!({
-      let a = create_note(&NoteId::new("a", "md"));
+      let mut a = create_note(&NoteId::new("a"));
 
-      let a = a.remove_tag("software").unwrap();
-      assert!(!a.has_tag("software"));
-
-      let a = a.add_tag("software").unwrap();
+      a.add_tag("software").unwrap();
       assert!(a.has_tag("software"));
 
-      let a = a.remove_tag("software").unwrap();
+      a.remove_tag("software").unwrap();
       assert!(!a.has_tag("software"));
     });
   }
