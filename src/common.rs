@@ -16,13 +16,10 @@ pub(crate) use std::{
 pub(crate) use {
   colored::Colorize,
   indoc::indoc,
-  matter,
   serde::Deserialize,
-  shellexpand,
   skim::prelude::*,
   snafu::{ResultExt, Snafu},
   structopt::StructOpt,
-  toml,
   walkdir::WalkDir,
   yaml_rust::YamlLoader,
 };
