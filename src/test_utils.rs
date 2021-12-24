@@ -11,11 +11,13 @@ macro_rules! in_temp_dir {
   };
 }
 
-pub(crate) fn create_note(note_id: &NoteId) -> Note {
-  let path = env::current_dir().unwrap().join(&note_id.to_string());
-  let mut file = File::create(&path).unwrap();
-  file.write_all(&Matter::default(&note_id.name)).unwrap();
-  Note::new(path)
+pub(crate) fn create_note(name: &str) -> Note {
+  Note::create(
+    env::current_dir()
+      .unwrap()
+      .join(&NoteId::new(name).to_string()),
+  )
+  .unwrap()
 }
 
 pub(crate) fn sleep() {

@@ -20,7 +20,7 @@ fn main() {
   match Opt::from_args().run() {
     Ok(()) => {},
     Err(e) => {
-      eprintln!("{}", format!("{}", e).red());
+      eprintln!("{}: {}", "error".red(), e);
       process::exit(1);
     },
   }

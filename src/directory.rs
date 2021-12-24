@@ -26,7 +26,7 @@ impl Directory {
       .map(|entry| entry.unwrap().into_path())
       .filter(|entry| entry.is_file())
       .for_each(|entry| {
-        notes.push(Note::new(entry));
+        notes.push(Note::from(entry).unwrap());
       });
 
     Ok(notes)
@@ -80,9 +80,9 @@ mod tests {
   #[test]
   fn notes() {
     in_temp_dir!({
-      create_note(&NoteId::new("a"));
-      create_note(&NoteId::new("b"));
-      create_note(&NoteId::new("c"));
+      create_note("a");
+      create_note("b");
+      create_note("c");
 
       let directory = Directory::new(env::current_dir().unwrap());
       let notes = directory.notes().unwrap();
@@ -95,7 +95,7 @@ mod tests {
   fn find() {
     in_temp_dir!({
       for _ in 0..5 {
-        create_note(&NoteId::new("a"));
+        create_note("a");
         sleep();
       }
 
@@ -113,8 +113,8 @@ mod tests {
   #[test]
   fn find_by_tag() {
     in_temp_dir!({
-      let mut a = create_note(&NoteId::new("a"));
-      let mut b = create_note(&NoteId::new("b"));
+      let mut a = create_note("a");
+      let mut b = create_note("b");
 
       a.add_tag("software").unwrap();
       b.add_tag("software").unwrap();

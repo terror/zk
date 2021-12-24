@@ -15,12 +15,8 @@ impl Handler {
   /// with an appropriate prefix in addition to writing the default YAML
   /// frontmatter.
   pub fn create(&self, name: &str) -> Result<()> {
-    let mut file = File::create(&self.directory.path.join(NoteId::new(name).to_string()))?;
-
-    file.write_all(&Matter::default(name))?;
-
+    Note::create(self.directory.path.join(NoteId::new(name).to_string()))?;
     self.open(name)?;
-
     Ok(())
   }
 
@@ -212,8 +208,10 @@ impl Handler {
     let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
     note.matter.links.iter().for_each(|link| {
-      tx.send(Arc::new(Note::new(self.directory.path.join(link))))
-        .unwrap();
+      tx.send(Arc::new(
+        Note::from(self.directory.path.join(link)).unwrap(),
+      ))
+      .unwrap();
     });
 
     drop(tx);

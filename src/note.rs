@@ -23,19 +23,30 @@ impl SkimItem for Note {
 }
 
 impl Note {
-  pub(crate) fn new(path: PathBuf) -> Self {
+  /// Create a new note on disk.
+  pub(crate) fn create(path: PathBuf) -> Result<Self> {
     let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
 
-    let (matter, content) = matter::matter(&fs::read_to_string(&path).unwrap()).unwrap();
+    let mut file = File::create(&path)?;
+    file.write_all(&Matter::default(&id.name))?;
+
+    Note::from(path)
+  }
+
+  /// Construct a new `Note` instance from a path.
+  pub(crate) fn from(path: PathBuf) -> Result<Self> {
+    let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
+
+    let (matter, content) = matter::matter(&fs::read_to_string(&path)?).unwrap();
 
     let matter = Matter::from(matter.as_str());
 
-    Self {
+    Ok(Self {
       id,
       path,
       matter,
       content,
-    }
+    })
   }
 
   /// Checks if a link exists between the current note and `name`.
@@ -90,7 +101,7 @@ mod tests {
   #[test]
   fn add_link() {
     in_temp_dir!({
-      let mut a = create_note(&NoteId::new("a"));
+      let mut a = create_note("a");
       let link = NoteId::new("b").to_string();
 
       a.add_link(&link).unwrap();
@@ -101,7 +112,7 @@ mod tests {
   #[test]
   fn add_tag() {
     in_temp_dir!({
-      let mut a = create_note(&NoteId::new("a"));
+      let mut a = create_note("a");
 
       a.add_tag("software").unwrap();
       assert!(a.has_tag("software"));
@@ -111,7 +122,7 @@ mod tests {
   #[test]
   fn remove_link() {
     in_temp_dir!({
-      let mut a = create_note(&NoteId::new("a"));
+      let mut a = create_note("a");
       let link = NoteId::new("b").to_string();
 
       a.add_link(&link).unwrap();
@@ -125,7 +136,7 @@ mod tests {
   #[test]
   fn remove_tag() {
     in_temp_dir!({
-      let mut a = create_note(&NoteId::new("a"));
+      let mut a = create_note("a");
 
       a.add_tag("software").unwrap();
       assert!(a.has_tag("software"));
