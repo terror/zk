@@ -24,7 +24,15 @@ impl Directory {
     WalkDir::new(&self.path)
       .into_iter()
       .map(|entry| entry.unwrap().into_path())
-      .filter(|entry| entry.is_file())
+      .filter(|entry| {
+        entry.is_file()
+          && entry
+            .extension()
+            .unwrap_or_else(|| OsStr::new(""))
+            .to_str()
+            .unwrap()
+            == "md"
+      })
       .for_each(|entry| {
         notes.push(Note::from(entry).unwrap());
       });
