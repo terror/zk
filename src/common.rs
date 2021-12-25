@@ -1,31 +1,27 @@
 // stdlib
-pub use std::{
+pub(crate) use std::{
   borrow::Cow,
   env,
   ffi::OsStr,
-  fmt,
+  fmt::{self, Display, Formatter},
   fs::{self, File},
-  io::{self, prelude::*, Cursor},
+  io::{self, prelude::*},
   path::{Path, PathBuf},
-  process::Command,
+  process::{self, Command},
   str,
   sync::Arc,
-  thread, time,
 };
 
 // dependencies
-pub use {
-  chrono::prelude::*,
-  colored::{Colorize, *},
-  matter,
-  serde::{Deserialize, Serialize},
-  shellexpand,
+pub(crate) use {
+  colored::Colorize,
+  indoc::indoc,
+  serde::Deserialize,
   skim::prelude::*,
   snafu::{ResultExt, Snafu},
   structopt::StructOpt,
-  toml,
   walkdir::WalkDir,
-  yaml_rust::{Yaml, YamlEmitter, YamlLoader},
+  yaml_rust::YamlLoader,
 };
 
 // modules
@@ -33,10 +29,18 @@ pub(crate) use crate::error;
 
 // test crates
 #[cfg(test)]
-pub use {crate::test_utils::*, tempfile::TempDir, textwrap::dedent};
+pub(crate) use {
+  crate::test_utils::*,
+  std::{thread, time},
+  tempfile::TempDir,
+  textwrap::dedent,
+};
 
 // structs and enums
-pub use crate::{
+pub(crate) use crate::{
   config::Config, directory::Directory, error::Error, expand_path::Expand, handler::Handler,
   matter::Matter, note::Note, note_id::NoteId, opt::Opt, search::Search,
 };
+
+// type aliases
+pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;

@@ -38,7 +38,7 @@ $ cargo install zkt
 ### Usage
 
 ```
-zk 0.0.1
+zk 0.0.3
 
 USAGE:
     zk <SUBCOMMAND>
@@ -79,10 +79,6 @@ path = '~/.zk'
 # The preferred editor of choice when opening
 # and editing notes.
 editor = 'vim'
-
-# The file extension for files that reside within the
-# Zettelkasten directory.
-ext = 'md'
 ```
 
 ### Keybindings

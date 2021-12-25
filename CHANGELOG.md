@@ -10,8 +10,6 @@
 - Panics after calls to unwrap() on `entry.extension()`. Now use an empty
   string as default
 
-Initial release
-
 ## [0.0.1] - 2021-07-02
 
 Initial release

@@ -1,6 +1,6 @@
 use crate::common::*;
 
-pub trait Expand {
+pub(crate) trait Expand {
   fn expand(&self) -> PathBuf;
 }
 

@@ -1,44 +1,37 @@
 use crate::common::*;
 
-const FILENAME: &str = ".zk.toml";
-
-const DEFAULT: &str = "
-  path   = '~/.zk'
-  editor = 'vim'
-  ext    = 'md'
-";
-
 #[derive(Deserialize, Debug, Clone)]
-pub struct Config {
-  pub path:   PathBuf,
-  pub editor: String,
-  pub ext:    String,
+pub(crate) struct Config {
+  pub(crate) path:   PathBuf,
+  pub(crate) editor: String,
 }
 
 impl Config {
   fn default() -> &'static str {
-    DEFAULT.trim()
+    indoc! {"
+      path   = '~/.zk'
+      editor = 'vim'
+    "}
   }
 
   fn filename() -> &'static str {
-    FILENAME
+    ".zk.toml"
   }
 
-  fn path() -> Result<Option<PathBuf>, Error> {
+  fn path() -> Result<Option<PathBuf>> {
     Ok(
-      xdg::BaseDirectories::with_prefix(dirs::home_dir().unwrap())
+      xdg::BaseDirectories::with_prefix(dirs::home_dir().unwrap_or_default())
         .context(error::BaseDirectories)?
         .find_config_file(Self::filename()),
     )
   }
 
-  pub fn load() -> Result<Self, Error> {
+  pub(crate) fn load() -> Result<Self> {
     if let Some(path) = Self::path()? {
-      let path = &path;
-      let contents = fs::read_to_string(path).context(error::LoadConfig { path })?;
-      Ok(toml::from_str(&contents).context(error::DeserializeConfig { path })?)
+      let content = fs::read_to_string(&path)?;
+      Ok(toml::from_str(&content)?)
     } else {
-      Ok(toml::from_str(Self::default()).unwrap())
+      Ok(toml::from_str(Self::default())?)
     }
   }
 }
@@ -48,20 +41,10 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_load_default_config() {
-    if Config::path().unwrap().is_none() {
-      let config = Config::load();
-
-      assert!(config.is_ok());
-
-      let config = config.unwrap();
-
-      assert_eq!(
-        config.path.expand(),
-        Path::join(&dirs::home_dir().unwrap(), ".zk")
-      );
-      assert_eq!(config.editor, "vim");
-      assert_eq!(config.ext, "md");
-    }
+  fn default() -> Result<()> {
+    let config: Config = toml::from_str(Config::default())?;
+    assert_eq!(config.path.to_str().unwrap(), "~/.zk");
+    assert_eq!(config.editor, "vim");
+    Ok(())
   }
 }

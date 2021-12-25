@@ -19,6 +19,9 @@ mod search;
 fn main() {
   match Opt::from_args().run() {
     Ok(()) => {},
-    Err(e) => eprintln!("{}", format!("{}", e).red()),
-  };
+    Err(e) => {
+      eprintln!("{}: {}", "error".red(), e);
+      process::exit(1);
+    },
+  }
 }
