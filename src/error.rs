@@ -6,6 +6,9 @@ pub enum Error {
   #[snafu(context(false), display("Unable to fetch base directory: {}", source))]
   BaseDirectories { source: xdg::BaseDirectoriesError },
 
+  #[snafu(display("Failed to send `SkimItem` over crossbeam_channel"))]
+  ChannelSend,
+
   #[snafu(
     context(false),
     display("Failed to Deserialize TOML configuration file: {}", source)
@@ -26,6 +29,9 @@ pub enum Error {
 
   #[snafu(display("No note was selected"))]
   NoteNotSelected,
+
+  #[snafu(display("Error building `skim` options"))]
+  SkimOptions,
 
   #[snafu(display("Note already contains the tag `{}`", tag))]
   TagExists { tag: String },

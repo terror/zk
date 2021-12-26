@@ -11,7 +11,7 @@ impl Search {
 
   /// This method launches a `skim` fuzzy search with `items` and
   /// returns the selected items as their original type.
-  pub(crate) fn run(&self) -> Result<Vec<Note>, Error> {
+  pub(crate) fn run(&self) -> Result<Vec<Note>> {
     if self.items.len() == 1 {
       return Ok(self.items.clone());
     }
@@ -21,14 +21,15 @@ impl Search {
       .preview(Some(""))
       .multi(true)
       .build()
-      .unwrap();
+      .map_err(|_| Error::SkimOptions)?;
 
     let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
     self
       .items
       .iter()
-      .for_each(|note| tx.send(Arc::new(note.to_owned())).unwrap());
+      .try_for_each(|note| tx.send(Arc::new(note.to_owned())))
+      .map_err(|_| Error::ChannelSend)?;
 
     drop(tx);
 

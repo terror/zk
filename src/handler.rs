@@ -172,12 +172,16 @@ impl Handler {
 
     let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
-    note.matter.links.iter().for_each(|link| {
-      tx.send(Arc::new(
-        Note::from(self.directory.path.join(link)).unwrap(),
-      ))
-      .unwrap();
-    });
+    note
+      .matter
+      .links
+      .iter()
+      .map(|link| Note::from(self.directory.path.join(link)))
+      .collect::<Result<Vec<_>, _>>()?
+      .iter()
+      .cloned()
+      .try_for_each(|note| tx.send(Arc::new(note)))
+      .map_err(|_| Error::ChannelSend)?;
 
     drop(tx);
 
