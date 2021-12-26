@@ -18,7 +18,7 @@ impl SkimItem for Note {
   }
 
   fn preview(&self, _context: PreviewContext) -> ItemPreview {
-    ItemPreview::Command(format!("cat {}", self.path.display()))
+    ItemPreview::Command(format!("cat \"{}\"", self.path.display()))
   }
 }
 
