@@ -18,7 +18,7 @@ making new connections between seemingly unrelated ideas.
 
 ### Features
 - Fast fuzzy search and link exploration powered by [skim](https://github.com/lotabout/skim)
-- Works with a flat directory of files
+- Works with a flat directory of markdown files
 - Minimal configuration with sensible defaults
 
 ### Demo
