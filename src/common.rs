@@ -13,8 +13,13 @@ pub(crate) use std::{
 
 // dependencies
 pub(crate) use {
-  colored::Colorize, indoc::indoc, serde::Deserialize, skim::prelude::*, snafu::Snafu,
-  structopt::StructOpt, walkdir::WalkDir, yaml_rust::YamlLoader,
+  colored::Colorize,
+  indoc::indoc,
+  serde::{Deserialize, Serialize},
+  skim::prelude::*,
+  snafu::Snafu,
+  structopt::StructOpt,
+  walkdir::WalkDir,
 };
 
 // structs and enums
@@ -35,5 +40,4 @@ pub(crate) use {
   crate::test_utils::*,
   std::{env, thread, time},
   tempfile::TempDir,
-  textwrap::dedent,
 };

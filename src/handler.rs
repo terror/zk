@@ -174,6 +174,7 @@ impl Handler {
     note
       .matter
       .links
+      .unwrap_or_default()
       .iter()
       .map(|link| Note::from(self.directory.path.join(link)))
       .collect::<Result<Vec<_>, _>>()?

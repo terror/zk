@@ -47,4 +47,7 @@ pub enum Error {
 
   #[snafu(context(false), display("Walkdir Error: {}", source))]
   Walkdir { source: walkdir::Error },
+
+  #[snafu(context(false), display("YAML se/de error: {}", source))]
+  Yaml { source: serde_yaml::Error },
 }

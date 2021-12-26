@@ -52,7 +52,14 @@ impl Directory {
     let ret = &self
       .notes()?
       .iter()
-      .filter(|note| note.matter.tags.contains(&tag.to_string()))
+      .filter(|note| {
+        note
+          .matter
+          .tags
+          .to_owned()
+          .unwrap_or_default()
+          .contains(&tag.to_string())
+      })
       .cloned()
       .collect::<Vec<Note>>();
 

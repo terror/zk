@@ -30,7 +30,7 @@ impl Note {
     })?;
 
     let mut file = File::create(&path)?;
-    file.write_all(&Matter::default(&id.name))?;
+    file.write_all(&Matter::default(&id.name)?)?;
 
     Note::from(path)
   }
@@ -43,7 +43,7 @@ impl Note {
 
     let (matter, content) = matter::matter(&fs::read_to_string(&path)?).unwrap_or_default();
 
-    let matter = Matter::from(matter.as_str());
+    let matter = Matter::from(matter.as_str())?;
 
     Ok(Self {
       id,
@@ -55,12 +55,22 @@ impl Note {
 
   /// Checks if a link exists between the current note and `name`.
   pub(crate) fn has_link(&self, name: &str) -> bool {
-    self.matter.links.contains(&name.to_string())
+    self
+      .matter
+      .links
+      .to_owned()
+      .unwrap_or_default()
+      .contains(&name.to_string())
   }
 
   /// Checks if a tag `name` exists within this notes tags.
   pub(crate) fn has_tag(&self, name: &str) -> bool {
-    self.matter.tags.contains(&name.to_string())
+    self
+      .matter
+      .tags
+      .to_owned()
+      .unwrap_or_default()
+      .contains(&name.to_string())
   }
 
   /// Attempts to add `name` as a link to the current note.
@@ -69,7 +79,13 @@ impl Note {
       true => Err(Error::LinkExists {
         link: name.to_string(),
       }),
-      _ => self.write(|note| note.matter.links.push(name.to_string())),
+      _ => self.write(|note| {
+        note
+          .matter
+          .links
+          .get_or_insert(Vec::new())
+          .push(name.to_string())
+      }),
     }
   }
 
@@ -80,7 +96,13 @@ impl Note {
         link: name.to_string(),
         name: self.id.to_string(),
       }),
-      _ => self.write(|note| note.matter.links.retain(|link| link != name)),
+      _ => self.write(|note| {
+        note
+          .matter
+          .links
+          .get_or_insert(Vec::new())
+          .retain(|link| link != name)
+      }),
     }
   }
 
@@ -90,7 +112,13 @@ impl Note {
       true => Err(Error::TagExists {
         tag: name.to_string(),
       }),
-      _ => self.write(|note| note.matter.tags.push(name.to_string())),
+      _ => self.write(|note| {
+        note
+          .matter
+          .tags
+          .get_or_insert(Vec::new())
+          .push(name.to_string())
+      }),
     }
   }
 
@@ -101,7 +129,13 @@ impl Note {
         tag:  name.to_string(),
         name: self.id.to_string(),
       }),
-      _ => self.write(|note| note.matter.tags.retain(|tag| tag != name)),
+      _ => self.write(|note| {
+        note
+          .matter
+          .tags
+          .get_or_insert(Vec::new())
+          .retain(|tag| tag != name)
+      }),
     }
   }
 
@@ -114,7 +148,7 @@ impl Note {
   fn write<F: Fn(&mut Note)>(&mut self, f: F) -> Result<Self> {
     f(self);
     let mut file = File::create(&self.path)?;
-    file.write_all(Matter::into_string(self.matter.clone()).as_bytes())?;
+    file.write_all(Matter::into(self.matter.clone())?.as_bytes())?;
     file.write_all(self.content.as_bytes())?;
     Ok(self.to_owned())
   }
