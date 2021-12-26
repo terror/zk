@@ -15,6 +15,9 @@ pub enum Error {
   )]
   DeserializeConfig { source: toml::de::Error },
 
+  #[snafu(display("Invalid note id: {}", id))]
+  InvalidNoteId { id: String },
+
   #[snafu(context(false), display("IO Error: {}", source))]
   Io { source: io::Error },
 

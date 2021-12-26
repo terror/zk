@@ -25,7 +25,9 @@ impl SkimItem for Note {
 impl Note {
   /// Create a new note on disk.
   pub(crate) fn create(path: PathBuf) -> Result<Self> {
-    let id = NoteId::parse(path.filename()).unwrap();
+    let id = NoteId::parse(path.filename()).ok_or(Error::InvalidNoteId {
+      id: path.filename().to_string(),
+    })?;
 
     let mut file = File::create(&path)?;
     file.write_all(&Matter::default(&id.name))?;
@@ -35,7 +37,9 @@ impl Note {
 
   /// Construct a new `Note` instance from a path.
   pub(crate) fn from(path: PathBuf) -> Result<Self> {
-    let id = NoteId::parse(path.filename()).unwrap();
+    let id = NoteId::parse(path.filename()).ok_or(Error::InvalidNoteId {
+      id: path.filename().to_string(),
+    })?;
 
     let (matter, content) = matter::matter(&fs::read_to_string(&path)?).unwrap_or_default();
 
