@@ -26,7 +26,7 @@ impl NoteId {
   /// return a valid `NoteId` based on the resulting parts.
   pub(crate) fn parse(filename: &str) -> Option<Self> {
     let mut split =
-      filename[..filename.rfind('.').unwrap_or_else(|| filename.len())].splitn(2, '-');
+      filename[..filename.rfind('.').unwrap_or_else(|| filename.len())].splitn(2, &['-', ' ']);
 
     Some(Self {
       prefix: split.next().unwrap_or("").to_owned(),
@@ -42,14 +42,16 @@ mod tests {
   #[test]
   fn parse() {
     let cases = vec![
-      ("123-a", "123", "a"),
-      ("123-a.md", "123", "a"),
-      ("abc123-", "abc123", ""),
+      ("a-b", "a", "b"),
+      ("a-b.md", "a", "b"),
+      ("a-", "a", ""),
+      ("a", "a", ""),
+      ("a.md", "a", ""),
+      ("a-b-c.md", "a", "b-c"),
+      ("a.b-c-d.md", "a.b", "c-d"),
+      ("a b.md", "a", "b"),
+      ("a b c.md", "a", "b c"),
       ("", "", ""),
-      ("abc123", "abc123", ""),
-      ("123292.md", "123292", ""),
-      ("123292-binary-search.md", "123292", "binary-search"),
-      ("123.292-binary-search.md", "123.292", "binary-search"),
     ];
 
     for case in cases {
