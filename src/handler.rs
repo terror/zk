@@ -12,7 +12,7 @@ impl Handler {
   }
 
   /// Creates a new note with the specified `name` in the Zettelkasten directory
-  /// with an appropriate prefix in addition to writing the default YAML
+  /// with an appropriate prefix, in addition to writing the default YAML
   /// frontmatter.
   pub fn create(&self, name: &str) -> Result<()> {
     Note::create(self.directory.path.join(NoteId::new(name).to_string()))?;
@@ -23,7 +23,7 @@ impl Handler {
   /// Opens a note given a `name` using the editor specified in the
   /// configuration file. If there are multiple notes present with the
   /// same `name`, the user will be prompted with `skim` to choose
-  /// which file(s) is/are desired to be opened.
+  /// which file is desired to be opened.
   pub(crate) fn open(&self, name: &str) -> Result<(), Error> {
     let candidates = self.directory.find(name)?;
 

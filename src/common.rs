@@ -1,7 +1,6 @@
 // stdlib
 pub(crate) use std::{
   borrow::Cow,
-  env,
   ffi::OsStr,
   fmt::{self, Display, Formatter},
   fs::{self, File},
@@ -14,26 +13,8 @@ pub(crate) use std::{
 
 // dependencies
 pub(crate) use {
-  colored::Colorize,
-  indoc::indoc,
-  serde::Deserialize,
-  skim::prelude::*,
-  snafu::{ResultExt, Snafu},
-  structopt::StructOpt,
-  walkdir::WalkDir,
-  yaml_rust::YamlLoader,
-};
-
-// modules
-pub(crate) use crate::error;
-
-// test crates
-#[cfg(test)]
-pub(crate) use {
-  crate::test_utils::*,
-  std::{thread, time},
-  tempfile::TempDir,
-  textwrap::dedent,
+  colored::Colorize, indoc::indoc, serde::Deserialize, skim::prelude::*, snafu::Snafu,
+  structopt::StructOpt, walkdir::WalkDir, yaml_rust::YamlLoader,
 };
 
 // structs and enums
@@ -44,3 +25,12 @@ pub(crate) use crate::{
 
 // type aliases
 pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
+
+// test dependencies
+#[cfg(test)]
+pub(crate) use {
+  crate::test_utils::*,
+  std::{thread, time, env},
+  tempfile::TempDir,
+  textwrap::dedent,
+};

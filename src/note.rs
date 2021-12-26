@@ -61,22 +61,44 @@ impl Note {
 
   /// Attempts to add `name` as a link to the current note.
   pub(crate) fn add_link(&mut self, name: &str) -> Result<Self> {
-    self.write(|note| note.matter.links.push(name.to_string()))
+    match self.has_link(name) {
+      true => Err(Error::LinkExists {
+        link: name.to_string(),
+      }),
+      _ => self.write(|note| note.matter.links.push(name.to_string())),
+    }
   }
 
   /// Attempts to remove `name` as a link from the current note.
   pub(crate) fn remove_link(&mut self, name: &str) -> Result<Self> {
-    self.write(|note| note.matter.links.retain(|link| link != name))
+    match !self.has_link(name) {
+      true => Err(Error::LinkMissing {
+        link: name.to_string(),
+        name: self.id.to_string(),
+      }),
+      _ => self.write(|note| note.matter.links.retain(|link| link != name)),
+    }
   }
 
   /// Attempts to add `name` as a tag to the current note.
   pub(crate) fn add_tag(&mut self, name: &str) -> Result<Self> {
-    self.write(|note| note.matter.tags.push(name.to_string()))
+    match self.has_tag(name) {
+      true => Err(Error::TagExists {
+        tag: name.to_string(),
+      }),
+      _ => self.write(|note| note.matter.tags.push(name.to_string())),
+    }
   }
 
   /// Attempts to remove `name` as a tag from the current note.
   pub(crate) fn remove_tag(&mut self, name: &str) -> Result<Self> {
-    self.write(|note| note.matter.tags.retain(|tag| tag != name))
+    match !self.has_tag(name) {
+      true => Err(Error::TagMissing {
+        tag:  name.to_string(),
+        name: self.id.to_string(),
+      }),
+      _ => self.write(|note| note.matter.tags.retain(|tag| tag != name)),
+    }
   }
 
   /// Remove this notes file on disk.
@@ -143,6 +165,47 @@ mod tests {
 
       a.remove_tag("software").unwrap();
       assert!(!a.has_tag("software"));
+    });
+  }
+
+  #[test]
+  fn add_tag_existing() {
+    in_temp_dir!({
+      let mut a = create_note("a");
+
+      a.add_tag("software").unwrap();
+      assert!(a.has_tag("software"));
+
+      assert!(a.add_tag("software").is_err());
+    });
+  }
+
+  #[test]
+  fn add_link_existing() {
+    in_temp_dir!({
+      let mut a = create_note("a");
+      let link = NoteId::new("b").to_string();
+
+      a.add_link(&link).unwrap();
+      assert!(a.has_link(&link));
+
+      assert!(a.add_link(&link).is_err());
+    });
+  }
+
+  #[test]
+  fn remove_tag_missing() {
+    in_temp_dir!({
+      let mut a = create_note("a");
+      assert!(a.remove_tag("software").is_err());
+    });
+  }
+
+  #[test]
+  fn remove_link_missing() {
+    in_temp_dir!({
+      let mut a = create_note("a");
+      assert!(a.remove_link("b").is_err());
     });
   }
 }

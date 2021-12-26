@@ -15,12 +15,6 @@ impl Directory {
   pub fn notes(&self) -> Result<Vec<Note>> {
     let mut notes = Vec::new();
 
-    if !&self.path.exists() {
-      return Err(error::Error::Path {
-        path: self.path.to_owned(),
-      });
-    }
-
     WalkDir::new(&self.path)
       .into_iter()
       .map(|entry| entry.unwrap().into_path())
@@ -53,7 +47,7 @@ impl Directory {
       .collect::<Vec<Note>>();
 
     match ret.len() {
-      0 => Err(error::Error::NoteNotFound {
+      0 => Err(Error::NoteNotFound {
         name: name.to_owned(),
       }),
       _ => Ok(ret.to_vec()),
@@ -73,7 +67,7 @@ impl Directory {
       .collect::<Vec<Note>>();
 
     match ret.len() {
-      0 => Err(error::Error::TagNotFound {
+      0 => Err(Error::TagNotFound {
         tag: tag.to_owned(),
       }),
       _ => Ok(ret.to_vec()),

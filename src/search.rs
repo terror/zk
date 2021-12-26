@@ -46,7 +46,7 @@ impl Search {
       .collect::<Vec<Note>>();
 
     match selected_items.len() {
-      0 => Err(error::Error::NoteNotSelected),
+      0 => Err(Error::NoteNotSelected),
       _ => Ok(selected_items),
     }
   }
