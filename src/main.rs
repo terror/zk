@@ -8,12 +8,12 @@ mod common;
 mod config;
 mod directory;
 mod error;
-mod expand_path;
 mod handler;
 mod matter;
 mod note;
 mod note_id;
 mod opt;
+mod path_ext;
 mod search;
 
 fn main() {

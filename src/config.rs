@@ -20,8 +20,7 @@ impl Config {
 
   fn path() -> Result<Option<PathBuf>> {
     Ok(
-      xdg::BaseDirectories::with_prefix(dirs::home_dir().unwrap_or_default())
-        .context(error::BaseDirectories)?
+      xdg::BaseDirectories::with_prefix(dirs::home_dir().unwrap_or_default())?
         .find_config_file(Self::filename()),
     )
   }

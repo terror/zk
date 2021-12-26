@@ -21,6 +21,7 @@ colored     = "2.0.0"
 dirs        = "4.0.0"
 indoc       = "1.0.3"
 matter      = "0.1.0-alpha4"
+serde_yaml  = "0.8.23"
 shellexpand = "2.1.0"
 skim        = "0.9.4"
 snafu       = "0.6.10"
@@ -28,13 +29,11 @@ structopt   = "0.3.25"
 toml        = "0.5.8"
 walkdir     = "2.3.2"
 xdg         = "2.4.0"
-yaml-rust   = "0.4.5"
 
 [dependencies.serde]
-version  = "1.0.130"
+version  = "1.0.132"
 features = ["derive"]
 
 [dev-dependencies]
 pretty_assertions = "1.0.0"
 tempfile          = "3.2.0"
-textwrap          = "0.14.2"

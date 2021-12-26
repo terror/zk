@@ -55,7 +55,7 @@ impl Opt {
     let handler = Handler::new(config.clone(), Directory::new(config.path.expand()));
 
     match self {
-      Opt::Dir => handler.dir()?,
+      Opt::Dir => handler.dir(),
       Opt::Explore { name } => handler.explore(&name)?,
       Opt::Find { tag } => handler.find(&tag)?,
       Opt::Link { left, right } => handler.link(&left, &right)?,

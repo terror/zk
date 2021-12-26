@@ -1,44 +1,36 @@
 use crate::common::*;
 
 #[derive(Debug, Clone)]
-pub struct NoteId {
-  pub prefix: String,
-  pub name:   String,
-  pub ext:    String,
+pub(crate) struct NoteId {
+  pub(crate) prefix: String,
+  pub(crate) name:   String,
 }
 
 impl Display for NoteId {
   fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-    write!(f, "{}-{}.{}", self.prefix, self.name, self.ext)
+    write!(f, "{}-{}.md", self.prefix, self.name)
   }
 }
 
 impl NoteId {
   /// Generates a `NoteId` using the passed in `name` and a naive UTC
   /// datetime timestamp.
-  pub fn new(name: &str) -> Self {
+  pub(crate) fn new(name: &str) -> Self {
     Self {
-      name:   name.to_owned(),
       prefix: chrono::Utc::now().naive_utc().timestamp().to_string(),
-      ext:    "md".to_owned(),
+      name:   name.to_owned(),
     }
   }
 
   /// Splits a filename on `-` and attempts to
   /// return a valid `NoteId` based on the resulting parts.
-  pub fn parse(filename: &str) -> Option<Self> {
-    let ext = Path::new(filename)
-      .extension()
-      .and_then(OsStr::to_str)
-      .unwrap_or("");
-
-    let mut split =
-      filename[..filename.rfind('.').unwrap_or_else(|| filename.len())].splitn(2, '-');
+  pub(crate) fn parse(filename: &str) -> Option<Self> {
+    let mut split = filename[..filename.rfind('.').unwrap_or_else(|| filename.len())]
+      .splitn(2, |c| c == '-' || c == ' ');
 
     Some(Self {
       prefix: split.next().unwrap_or("").to_owned(),
       name:   split.next().unwrap_or("").to_owned(),
-      ext:    ext.to_owned(),
     })
   }
 }
@@ -50,22 +42,23 @@ mod tests {
   #[test]
   fn parse() {
     let cases = vec![
-      ("123-a", "123", "a", ""),
-      ("123-a.md", "123", "a", "md"),
-      ("abc123-", "abc123", "", ""),
-      ("", "", "", ""),
-      ("abc123", "abc123", "", ""),
-      ("123292.md", "123292", "", "md"),
-      ("123292-binary-search.md", "123292", "binary-search", "md"),
-      ("123.292-binary-search.md", "123.292", "binary-search", "md"),
+      ("a-b", "a", "b"),
+      ("a-b.md", "a", "b"),
+      ("a-", "a", ""),
+      ("a", "a", ""),
+      ("a.md", "a", ""),
+      ("a-b-c.md", "a", "b-c"),
+      ("a.b-c-d.md", "a.b", "c-d"),
+      ("a b.md", "a", "b"),
+      ("a b c.md", "a", "b c"),
+      ("", "", ""),
     ];
 
     for case in cases {
-      let (test, prefix, name, ext) = case;
+      let (test, prefix, name) = case;
       let id = NoteId::parse(test).unwrap();
       assert_eq!(id.prefix, prefix);
       assert_eq!(id.name, name);
-      assert_eq!(id.ext, ext);
     }
   }
 }
