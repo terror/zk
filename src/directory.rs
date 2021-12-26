@@ -72,14 +72,17 @@ mod tests {
   #[test]
   fn notes() {
     in_temp_dir!({
-      create_note("a");
-      create_note("b");
-      create_note("c");
+      create_note("a").unwrap();
+      create_note("b").unwrap();
+      create_note("c").unwrap();
 
-      let directory = Directory::new(env::current_dir().unwrap());
-      let notes = directory.notes().unwrap();
-
-      assert_eq!(notes.len(), 3);
+      assert_eq!(
+        Directory::new(env::current_dir().unwrap())
+          .notes()
+          .unwrap()
+          .len(),
+        3
+      );
     });
   }
 
@@ -87,12 +90,13 @@ mod tests {
   fn find() {
     in_temp_dir!({
       for _ in 0..5 {
-        create_note("a");
+        create_note("a").unwrap();
         sleep();
       }
 
-      let directory = Directory::new(env::current_dir().unwrap());
-      let notes = directory.find("a").unwrap();
+      let notes = Directory::new(env::current_dir().unwrap())
+        .find("a")
+        .unwrap();
 
       assert_eq!(notes.len(), 5);
 
@@ -105,14 +109,15 @@ mod tests {
   #[test]
   fn find_by_tag() {
     in_temp_dir!({
-      let mut a = create_note("a");
-      let mut b = create_note("b");
+      let mut a = create_note("a").unwrap();
+      let mut b = create_note("b").unwrap();
 
       a.add_tag("software").unwrap();
       b.add_tag("software").unwrap();
 
-      let directory = Directory::new(env::current_dir().unwrap());
-      let notes = directory.find_by_tag("software").unwrap();
+      let notes = Directory::new(env::current_dir().unwrap())
+        .find_by_tag("software")
+        .unwrap();
 
       assert_eq!(notes.len(), 2);
 

@@ -19,9 +19,12 @@ pub(crate) use {
 
 // structs and enums
 pub(crate) use crate::{
-  config::Config, directory::Directory, error::Error, expand_path::Expand, handler::Handler,
-  matter::Matter, note::Note, note_id::NoteId, opt::Opt, search::Search,
+  config::Config, directory::Directory, error::Error, handler::Handler, matter::Matter, note::Note,
+  note_id::NoteId, opt::Opt, search::Search,
 };
+
+// traits
+pub(crate) use crate::path_ext::PathExt;
 
 // type aliases
 pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;

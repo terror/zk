@@ -25,7 +25,7 @@ impl SkimItem for Note {
 impl Note {
   /// Create a new note on disk.
   pub(crate) fn create(path: PathBuf) -> Result<Self> {
-    let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
+    let id = NoteId::parse(path.filename()).unwrap();
 
     let mut file = File::create(&path)?;
     file.write_all(&Matter::default(&id.name))?;
@@ -35,7 +35,7 @@ impl Note {
 
   /// Construct a new `Note` instance from a path.
   pub(crate) fn from(path: PathBuf) -> Result<Self> {
-    let id = NoteId::parse(path.file_name().unwrap().to_str().unwrap()).unwrap();
+    let id = NoteId::parse(path.filename()).unwrap();
 
     let (matter, content) = matter::matter(&fs::read_to_string(&path)?).unwrap();
 
@@ -123,7 +123,7 @@ mod tests {
   #[test]
   fn add_link() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
       let link = NoteId::new("b").to_string();
 
       a.add_link(&link).unwrap();
@@ -134,7 +134,7 @@ mod tests {
   #[test]
   fn add_tag() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
 
       a.add_tag("software").unwrap();
       assert!(a.has_tag("software"));
@@ -144,7 +144,7 @@ mod tests {
   #[test]
   fn remove_link() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
       let link = NoteId::new("b").to_string();
 
       a.add_link(&link).unwrap();
@@ -158,7 +158,7 @@ mod tests {
   #[test]
   fn remove_tag() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
 
       a.add_tag("software").unwrap();
       assert!(a.has_tag("software"));
@@ -171,7 +171,7 @@ mod tests {
   #[test]
   fn add_tag_existing() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
 
       a.add_tag("software").unwrap();
       assert!(a.has_tag("software"));
@@ -183,7 +183,7 @@ mod tests {
   #[test]
   fn add_link_existing() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
       let link = NoteId::new("b").to_string();
 
       a.add_link(&link).unwrap();
@@ -196,7 +196,7 @@ mod tests {
   #[test]
   fn remove_tag_missing() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
       assert!(a.remove_tag("software").is_err());
     });
   }
@@ -204,7 +204,7 @@ mod tests {
   #[test]
   fn remove_link_missing() {
     in_temp_dir!({
-      let mut a = create_note("a");
+      let mut a = create_note("a").unwrap();
       assert!(a.remove_link("b").is_err());
     });
   }
