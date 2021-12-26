@@ -1,5 +1,16 @@
 ## Changelog
 
+## [0.0.3] - 2021-12-26
+
+### Added
+- Additional error variants and improved handling
+- General refactors
+- Tests for additional `Note` error cases
+- `NoteId` can now parse spaces
+
+### Fixed
+- Note preview error
+
 ## [0.0.2] - 2021-07-02
 
 ### Added
