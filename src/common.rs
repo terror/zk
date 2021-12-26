@@ -30,7 +30,7 @@ pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
 #[cfg(test)]
 pub(crate) use {
   crate::test_utils::*,
-  std::{thread, time, env},
+  std::{env, thread, time},
   tempfile::TempDir,
   textwrap::dedent,
 };

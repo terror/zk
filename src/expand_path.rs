@@ -6,6 +6,6 @@ pub(crate) trait Expand {
 
 impl Expand for PathBuf {
   fn expand(&self) -> PathBuf {
-    PathBuf::from(shellexpand::tilde(&self.to_str().unwrap()).to_string())
+    PathBuf::from(shellexpand::tilde(&self.to_str().unwrap_or_default()).to_string())
   }
 }

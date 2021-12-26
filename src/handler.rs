@@ -194,7 +194,7 @@ impl Handler {
     let note = Search::new(self.directory.find(name)?)
       .run()?
       .first()
-      .unwrap()
+      .ok_or(Error::NoteNotSelected)?
       .to_owned();
 
     let options = SkimOptionsBuilder::default()
