@@ -83,9 +83,8 @@ impl Handler {
   }
 
   /// Writes the current Zettelkasten storage location to stdout.
-  pub fn dir(&self) -> Result<()> {
+  pub fn dir(&self) {
     println!("{}", self.directory.path.expand().display());
-    Ok(())
   }
 
   /// Removes an existing note in the Zettelkasten directory. This will
