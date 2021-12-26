@@ -25,8 +25,8 @@ impl NoteId {
   /// Splits a filename on `-` and attempts to
   /// return a valid `NoteId` based on the resulting parts.
   pub(crate) fn parse(filename: &str) -> Option<Self> {
-    let mut split =
-      filename[..filename.rfind('.').unwrap_or_else(|| filename.len())].splitn(2, &['-', ' ']);
+    let mut split = filename[..filename.rfind('.').unwrap_or_else(|| filename.len())]
+      .splitn(2, |c| c == '-' || c == ' ');
 
     Some(Self {
       prefix: split.next().unwrap_or("").to_owned(),
