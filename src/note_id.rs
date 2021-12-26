@@ -1,10 +1,10 @@
 use crate::common::*;
 
 #[derive(Debug, Clone)]
-pub struct NoteId {
-  pub prefix: String,
-  pub name:   String,
-  pub ext:    String,
+pub(crate) struct NoteId {
+  pub(crate) prefix: String,
+  pub(crate) name:   String,
+  pub(crate) ext:    String,
 }
 
 impl Display for NoteId {
@@ -16,7 +16,7 @@ impl Display for NoteId {
 impl NoteId {
   /// Generates a `NoteId` using the passed in `name` and a naive UTC
   /// datetime timestamp.
-  pub fn new(name: &str) -> Self {
+  pub(crate) fn new(name: &str) -> Self {
     Self {
       name:   name.to_owned(),
       prefix: chrono::Utc::now().naive_utc().timestamp().to_string(),
@@ -26,7 +26,7 @@ impl NoteId {
 
   /// Splits a filename on `-` and attempts to
   /// return a valid `NoteId` based on the resulting parts.
-  pub fn parse(filename: &str) -> Option<Self> {
+  pub(crate) fn parse(filename: &str) -> Option<Self> {
     let path = PathBuf::from(filename);
 
     let mut split =
