@@ -20,7 +20,7 @@ impl Directory {
       .cloned()
       .map(|entry| entry.into_path())
       .filter(|entry| entry.is_file() && entry.extension().unwrap_or_default() == OsStr::new("md"))
-      .map(|entry| Note::from(entry))
+      .map(Note::from)
       .collect::<Result<Vec<_>, _>>()
   }
 
