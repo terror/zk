@@ -27,10 +27,7 @@ impl NoteId {
   /// Splits a filename on `-` and attempts to
   /// return a valid `NoteId` based on the resulting parts.
   pub fn parse(filename: &str) -> Option<Self> {
-    let ext = Path::new(filename)
-      .extension()
-      .and_then(OsStr::to_str)
-      .unwrap_or("");
+    let path = PathBuf::from(filename);
 
     let mut split =
       filename[..filename.rfind('.').unwrap_or_else(|| filename.len())].splitn(2, '-');
@@ -38,7 +35,7 @@ impl NoteId {
     Some(Self {
       prefix: split.next().unwrap_or("").to_owned(),
       name:   split.next().unwrap_or("").to_owned(),
-      ext:    ext.to_owned(),
+      ext:    path.ext().to_owned(),
     })
   }
 }

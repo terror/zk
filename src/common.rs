@@ -5,7 +5,7 @@ pub(crate) use std::{
   fmt::{self, Display, Formatter},
   fs::{self, File},
   io::{self, prelude::*},
-  path::{Path, PathBuf},
+  path::PathBuf,
   process::{self, Command},
   str,
   sync::Arc,
