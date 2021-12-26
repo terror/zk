@@ -13,25 +13,15 @@ impl Directory {
   /// Constructs a `Vec<Note>` based on a the directories path. This attempts to
   /// convert each instance of a file with extension `md` into a `Note`.
   pub fn notes(&self) -> Result<Vec<Note>> {
-    let mut notes = Vec::new();
-
     WalkDir::new(&self.path)
       .into_iter()
-      .map(|entry| entry.unwrap().into_path())
-      .filter(|entry| {
-        entry.is_file()
-          && entry
-            .extension()
-            .unwrap_or_else(|| OsStr::new(""))
-            .to_str()
-            .unwrap()
-            == "md"
-      })
-      .for_each(|entry| {
-        notes.push(Note::from(entry).unwrap());
-      });
-
-    Ok(notes)
+      .collect::<Result<Vec<_>, _>>()?
+      .iter()
+      .cloned()
+      .map(|entry| entry.into_path())
+      .filter(|entry| entry.is_file() && entry.extension().unwrap_or_default() == OsStr::new("md"))
+      .map(|entry| Note::from(entry))
+      .collect::<Result<Vec<_>, _>>()
   }
 
   /// Finds all notes that reside within this directories `path` whose name
