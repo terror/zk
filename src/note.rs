@@ -37,7 +37,7 @@ impl Note {
   pub(crate) fn from(path: PathBuf) -> Result<Self> {
     let id = NoteId::parse(path.filename()).unwrap();
 
-    let (matter, content) = matter::matter(&fs::read_to_string(&path)?).unwrap();
+    let (matter, content) = matter::matter(&fs::read_to_string(&path)?).unwrap_or_default();
 
     let matter = Matter::from(matter.as_str());
 
