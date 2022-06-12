@@ -1,14 +1,18 @@
 use crate::common::*;
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub(crate) struct Matter {
-  pub(crate) name:  String,
-  pub(crate) tags:  Option<Vec<String>>,
+  pub(crate) name: String,
+  pub(crate) tags: Option<Vec<String>>,
   pub(crate) links: Option<Vec<String>>,
 }
 
 impl Matter {
-  pub(crate) fn new(name: &str, tags: Option<Vec<String>>, links: Option<Vec<String>>) -> Self {
+  pub(crate) fn new(
+    name: &str,
+    tags: Option<Vec<String>>,
+    links: Option<Vec<String>>,
+  ) -> Self {
     Self {
       name: name.to_owned(),
       tags,
@@ -50,8 +54,8 @@ mod tests {
     vec![
       (
         Matter {
-          name:  "a".into(),
-          tags:  Some(vec![String::from("code"), String::from("software")]),
+          name: "a".into(),
+          tags: Some(vec![String::from("code"), String::from("software")]),
           links: Some(vec![String::from("b"), String::from("c")]),
         },
         indoc! {"
@@ -68,8 +72,8 @@ mod tests {
       ),
       (
         Matter {
-          name:  "b".into(),
-          tags:  Some(vec![]),
+          name: "b".into(),
+          tags: Some(vec![]),
           links: Some(vec![String::from("b"), String::from("c")]),
         },
         indoc! {"
@@ -84,8 +88,8 @@ mod tests {
       ),
       (
         Matter {
-          name:  "c".into(),
-          tags:  Some(vec![String::from("code"), String::from("software")]),
+          name: "c".into(),
+          tags: Some(vec![String::from("code"), String::from("software")]),
           links: Some(vec![]),
         },
         indoc! {"
@@ -100,8 +104,8 @@ mod tests {
       ),
       (
         Matter {
-          name:  "d".into(),
-          tags:  Some(vec![]),
+          name: "d".into(),
+          tags: Some(vec![]),
           links: Some(vec![]),
         },
         indoc! {"

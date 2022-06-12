@@ -2,7 +2,7 @@ use crate::common::*;
 
 #[derive(Deserialize, Debug, Clone)]
 pub(crate) struct Config {
-  pub(crate) path:   PathBuf,
+  pub(crate) path: PathBuf,
   pub(crate) editor: String,
 }
 

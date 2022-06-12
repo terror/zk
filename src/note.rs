@@ -3,11 +3,11 @@ use crate::common::*;
 #[derive(Debug, Clone)]
 pub(crate) struct Note {
   /// The notes timestamp prefix and name.
-  pub(crate) id:      NoteId,
+  pub(crate) id: NoteId,
   /// Where the note is currently stored.
-  pub(crate) path:    PathBuf,
+  pub(crate) path: PathBuf,
   /// Yaml frontmatter.
-  pub(crate) matter:  Matter,
+  pub(crate) matter: Matter,
   /// The notes content as a String.
   pub(crate) content: String,
 }
@@ -41,7 +41,8 @@ impl Note {
       id: path.filename().to_string(),
     })?;
 
-    let (matter, content) = matter::matter(&fs::read_to_string(&path)?).unwrap_or_default();
+    let (matter, content) =
+      matter::matter(&fs::read_to_string(&path)?).unwrap_or_default();
 
     let matter = Matter::from(matter.as_str())?;
 
@@ -126,7 +127,7 @@ impl Note {
   pub(crate) fn remove_tag(&mut self, name: &str) -> Result<Self> {
     match !self.has_tag(name) {
       true => Err(Error::TagMissing {
-        tag:  name.to_string(),
+        tag: name.to_string(),
         name: self.id.to_string(),
       }),
       _ => self.write(|note| {

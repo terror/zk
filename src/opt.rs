@@ -52,7 +52,8 @@ impl Opt {
   pub(crate) fn run(self) -> Result<(), Error> {
     let config = Config::load()?;
 
-    let handler = Handler::new(config.clone(), Directory::new(config.path.expand()));
+    let handler =
+      Handler::new(config.clone(), Directory::new(config.path.expand()));
 
     match self {
       Opt::Dir => handler.dir(),

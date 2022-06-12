@@ -18,10 +18,10 @@ mod search;
 
 fn main() {
   match Opt::from_args().run() {
-    Ok(()) => {},
+    Ok(()) => {}
     Err(e) => {
       eprintln!("{}: {}", "error".red(), e);
       process::exit(1);
-    },
+    }
   }
 }

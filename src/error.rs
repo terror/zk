@@ -3,7 +3,10 @@ use crate::common::*;
 #[derive(Debug, Snafu)]
 #[snafu(visibility(pub(crate)))]
 pub enum Error {
-  #[snafu(context(false), display("Unable to fetch base directory: {}", source))]
+  #[snafu(
+    context(false),
+    display("Unable to fetch base directory: {}", source)
+  )]
   BaseDirectories { source: xdg::BaseDirectoriesError },
 
   #[snafu(display("Failed to send `SkimItem` over crossbeam_channel"))]
