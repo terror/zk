@@ -24,8 +24,8 @@ pub(crate) use {
 
 // structs and enums
 pub(crate) use crate::{
-  config::Config, directory::Directory, error::Error, handler::Handler, matter::Matter, note::Note,
-  note_id::NoteId, opt::Opt, search::Search,
+  config::Config, directory::Directory, error::Error, handler::Handler,
+  matter::Matter, note::Note, note_id::NoteId, opt::Opt, search::Search,
 };
 
 // traits

@@ -2,7 +2,7 @@ use crate::common::*;
 
 #[derive(Debug)]
 pub(crate) struct Handler {
-  pub(crate) config:    Config,
+  pub(crate) config: Config,
   pub(crate) directory: Directory,
 }
 
@@ -199,15 +199,17 @@ impl Handler {
         .collect::<Vec<Note>>();
 
       match out.final_key {
-        Key::Enter =>
+        Key::Enter => {
           if let Some(item) = selected_items.first() {
             self.explore(&item.id.name)?
-          },
-        Key::Ctrl('e') =>
+          }
+        }
+        Key::Ctrl('e') => {
           if let Some(item) = selected_items.first() {
             self.open(&item.id.name)?
-          },
-        _ => {},
+          }
+        }
+        _ => {}
       };
     }
 

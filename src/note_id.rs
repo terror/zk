@@ -3,7 +3,7 @@ use crate::common::*;
 #[derive(Debug, Clone)]
 pub(crate) struct NoteId {
   pub(crate) prefix: String,
-  pub(crate) name:   String,
+  pub(crate) name: String,
 }
 
 impl Display for NoteId {
@@ -18,19 +18,19 @@ impl NoteId {
   pub(crate) fn new(name: &str) -> Self {
     Self {
       prefix: chrono::Utc::now().naive_utc().timestamp().to_string(),
-      name:   name.to_owned(),
+      name: name.to_owned(),
     }
   }
 
   /// Splits a filename on `-` and attempts to
   /// return a valid `NoteId` based on the resulting parts.
   pub(crate) fn parse(filename: &str) -> Option<Self> {
-    let mut split = filename[..filename.rfind('.').unwrap_or_else(|| filename.len())]
+    let mut split = filename[..filename.rfind('.').unwrap_or(filename.len())]
       .splitn(2, |c| c == '-' || c == ' ');
 
     Some(Self {
       prefix: split.next().unwrap_or("").to_owned(),
-      name:   split.next().unwrap_or("").to_owned(),
+      name: split.next().unwrap_or("").to_owned(),
     })
   }
 }
