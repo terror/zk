@@ -51,28 +51,29 @@ The primary way to use `zk` is via the provided command-line interface, for
 which help output is provided below:
 
 ```present cargo run -- --help
-zk 0.1.0
+zk-cli 0.1.0
+Liam <liam@scalzulli.com>
+A note-taking tool based on the famous Zettelkasten method
 
-USAGE:
-    zk <SUBCOMMAND>
+Usage: zk <COMMAND>
 
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+Commands:
+  dir      Output the Zettelkasten directory path
+  explore  Explore note links
+  find     Find notes by tag
+  link     Link two notes
+  new      Create a new note
+  open     Open a note
+  rm       Remove a note
+  rmtag    Remove a tag from a note
+  rmlink   Remove a link between two notes
+  search   Fuzzy search notes
+  tag      Add a tag to a note
+  help     Print this message or the help of the given subcommand(s)
 
-SUBCOMMANDS:
-    dir        Output the Zettelkasten directory path
-    explore    Explore note links
-    find       Find notes by tag
-    help       Prints this message or the help of the given subcommand(s)
-    link       Link two notes
-    new        Create a new note
-    open       Open a note
-    rm         Remove a note
-    rmlink     Remove a link between two notes
-    rmtag      Remove a tag from a note
-    search     Fuzzy search notes
-    tag        Add a tag to a note
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 ## Configuration

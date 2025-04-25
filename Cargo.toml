@@ -17,6 +17,7 @@ path = "src/main.rs"
 
 [dependencies]
 chrono = "0.4.40"
+clap = { version = "4.5.37", features = ["derive"] }
 colored = "2.2.0"
 dirs = "4.0.0"
 indoc = "1.0.9"
@@ -26,7 +27,6 @@ serde_yaml = "0.8.26"
 shellexpand = "2.1.2"
 skim = "0.9.4"
 snafu = "0.6.10"
-structopt = "0.3.26"
 toml = "0.5.11"
 walkdir = "2.5.0"
 xdg = "2.5.2"
