@@ -1,39 +1,52 @@
 use crate::common::*;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "zk")]
+#[derive(Debug, Parser)]
+#[clap(
+  about,
+  author,
+  version,
+  help_template = "\
+{before-help}{name} {version}
+{author}
+{about}
+
+\x1b[1;4mUsage\x1b[0m: {usage}
+
+{all-args}{after-help}
+"
+)]
 pub(crate) enum Opt {
-  #[structopt(name = "dir", alias = "d")]
+  #[clap(name = "dir", alias = "d")]
   /// Output the Zettelkasten directory path
   Dir,
-  #[structopt(name = "explore", alias = "e")]
+  #[clap(name = "explore", alias = "e")]
   /// Explore note links
   Explore { name: String },
-  #[structopt(name = "find", alias = "f")]
+  #[clap(name = "find", alias = "f")]
   /// Find notes by tag
   Find { tag: String },
-  #[structopt(name = "link", alias = "l")]
+  #[clap(name = "link", alias = "l")]
   /// Link two notes
   Link { left: String, right: String },
-  #[structopt(name = "new", alias = "n")]
+  #[clap(name = "new", alias = "n")]
   /// Create a new note
   New { name: String },
-  #[structopt(name = "open", alias = "o")]
+  #[clap(name = "open", alias = "o")]
   /// Open a note
   Open { name: String },
-  #[structopt(name = "rm")]
+  #[clap(name = "rm")]
   /// Remove a note
   Remove { name: String },
-  #[structopt(name = "rmtag", alias = "rt")]
+  #[clap(name = "rmtag", alias = "rt")]
   /// Remove a tag from a note
   RemoveTag { name: String, tag: String },
-  #[structopt(name = "rmlink", alias = "rl")]
+  #[clap(name = "rmlink", alias = "rl")]
   /// Remove a link between two notes
   RemoveLink { left: String, right: String },
-  #[structopt(name = "search", alias = "s")]
+  #[clap(name = "search", alias = "s")]
   /// Fuzzy search notes
   Search,
-  #[structopt(name = "tag", alias = "t")]
+  #[clap(name = "tag", alias = "t")]
   /// Add a tag to a note
   Tag { name: String, tag: String },
 }

@@ -11,12 +11,12 @@ pub(crate) use std::{
 };
 
 pub(crate) use {
+  clap::Parser,
   colored::Colorize,
   indoc::indoc,
   serde::{Deserialize, Serialize},
   skim::prelude::*,
   snafu::Snafu,
-  structopt::StructOpt,
   walkdir::WalkDir,
 };
 
