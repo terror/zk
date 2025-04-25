@@ -9,8 +9,6 @@ impl Search {
     Self { items }
   }
 
-  /// This method launches a `skim` fuzzy search with `items` and
-  /// returns the selected items as their original type.
   pub(crate) fn run(&self) -> Result<Vec<Note>> {
     if self.items.len() == 1 {
       return Ok(self.items.clone());
@@ -46,9 +44,10 @@ impl Search {
       })
       .collect::<Vec<Note>>();
 
-    match selected_items.len() {
-      0 => Err(Error::NoteNotSelected),
-      _ => Ok(selected_items),
+    if selected_items.is_empty() {
+      return Err(Error::NoteNotSelected);
     }
+
+    Ok(selected_items)
   }
 }

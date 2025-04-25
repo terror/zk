@@ -73,4 +73,4 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Test
-        run: cargo test
+        run: cargo test -- --test-threads 1

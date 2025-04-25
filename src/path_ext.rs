@@ -2,8 +2,8 @@ use crate::common::*;
 
 pub(crate) trait PathExt {
   fn expand(&self) -> PathBuf;
-  fn filename(&self) -> &str;
-  fn ext(&self) -> &str;
+  fn unwrapped_extension(&self) -> &str;
+  fn unwrapped_filename(&self) -> &str;
 }
 
 impl PathExt for PathBuf {
@@ -13,7 +13,7 @@ impl PathExt for PathBuf {
     )
   }
 
-  fn filename(&self) -> &str {
+  fn unwrapped_filename(&self) -> &str {
     self
       .file_name()
       .unwrap_or_default()
@@ -21,7 +21,7 @@ impl PathExt for PathBuf {
       .unwrap_or_default()
   }
 
-  fn ext(&self) -> &str {
+  fn unwrapped_extension(&self) -> &str {
     self.extension().and_then(OsStr::to_str).unwrap_or_default()
   }
 }
@@ -31,14 +31,12 @@ mod tests {
   use super::*;
 
   #[test]
-  fn filename() {
-    let path = PathBuf::from("a/b/c.md");
-    assert_eq!(path.filename(), "c.md");
+  fn unwrapped_extension() {
+    assert_eq!(PathBuf::from("c.md").unwrapped_extension(), "md");
   }
 
   #[test]
-  fn extension() {
-    let path = PathBuf::from("c.md");
-    assert_eq!(path.ext(), "md");
+  fn unwrapped_filename() {
+    assert_eq!(PathBuf::from("a/b/c.md").unwrapped_filename(), "c.md");
   }
 }

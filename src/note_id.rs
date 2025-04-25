@@ -13,8 +13,6 @@ impl Display for NoteId {
 }
 
 impl NoteId {
-  /// Generates a `NoteId` using the passed in `name` and a naive UTC
-  /// datetime timestamp.
   pub(crate) fn new(name: &str) -> Self {
     Self {
       prefix: chrono::Utc::now()
@@ -26,8 +24,6 @@ impl NoteId {
     }
   }
 
-  /// Splits a filename on `-` and attempts to
-  /// return a valid `NoteId` based on the resulting parts.
   pub(crate) fn parse(filename: &str) -> Option<Self> {
     let mut split = filename[..filename.rfind('.').unwrap_or(filename.len())]
       .splitn(2, |c| ['-', ' '].contains(&c));

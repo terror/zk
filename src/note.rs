@@ -2,13 +2,9 @@ use crate::common::*;
 
 #[derive(Debug, Clone)]
 pub(crate) struct Note {
-  /// The notes timestamp prefix and name.
   pub(crate) id: NoteId,
-  /// Where the note is currently stored.
   pub(crate) path: PathBuf,
-  /// Yaml frontmatter.
   pub(crate) matter: Matter,
-  /// The notes content as a String.
   pub(crate) content: String,
 }
 
@@ -23,11 +19,11 @@ impl SkimItem for Note {
 }
 
 impl Note {
-  /// Create a new note on disk.
   pub(crate) fn create(path: PathBuf) -> Result<Self> {
-    let id = NoteId::parse(path.filename()).ok_or(Error::InvalidNoteId {
-      id: path.filename().to_string(),
-    })?;
+    let id =
+      NoteId::parse(path.unwrapped_filename()).ok_or(Error::InvalidNoteId {
+        id: path.unwrapped_filename().to_string(),
+      })?;
 
     let mut file = File::create(&path)?;
     file.write_all(&Matter::default(&id.name)?)?;
@@ -35,11 +31,11 @@ impl Note {
     Note::from(path)
   }
 
-  /// Construct a new `Note` instance from a path.
   pub(crate) fn from(path: PathBuf) -> Result<Self> {
-    let id = NoteId::parse(path.filename()).ok_or(Error::InvalidNoteId {
-      id: path.filename().to_string(),
-    })?;
+    let id =
+      NoteId::parse(path.unwrapped_filename()).ok_or(Error::InvalidNoteId {
+        id: path.unwrapped_filename().to_string(),
+      })?;
 
     let (matter, content) =
       matter::matter(&fs::read_to_string(&path)?).unwrap_or_default();
@@ -54,7 +50,6 @@ impl Note {
     })
   }
 
-  /// Checks if a link exists between the current note and `name`.
   pub(crate) fn has_link(&self, name: &str) -> bool {
     self
       .matter
@@ -64,7 +59,6 @@ impl Note {
       .contains(&name.to_string())
   }
 
-  /// Checks if a tag `name` exists within this notes tags.
   pub(crate) fn has_tag(&self, name: &str) -> bool {
     self
       .matter
@@ -74,78 +68,76 @@ impl Note {
       .contains(&name.to_string())
   }
 
-  /// Attempts to add `name` as a link to the current note.
   pub(crate) fn add_link(&mut self, name: &str) -> Result<Self> {
-    match self.has_link(name) {
-      true => Err(Error::LinkExists {
+    if self.has_link(name) {
+      return Err(Error::LinkExists {
         link: name.to_string(),
-      }),
-      _ => self.write(|note| {
-        note
-          .matter
-          .links
-          .get_or_insert(Vec::new())
-          .push(name.to_string())
-      }),
+      });
     }
+
+    self.write(|note| {
+      note
+        .matter
+        .links
+        .get_or_insert(Vec::new())
+        .push(name.to_string())
+    })
   }
 
-  /// Attempts to remove `name` as a link from the current note.
   pub(crate) fn remove_link(&mut self, name: &str) -> Result<Self> {
-    match !self.has_link(name) {
-      true => Err(Error::LinkMissing {
+    if !self.has_link(name) {
+      return Err(Error::LinkMissing {
         link: name.to_string(),
         name: self.id.to_string(),
-      }),
-      _ => self.write(|note| {
-        note
-          .matter
-          .links
-          .get_or_insert(Vec::new())
-          .retain(|link| link != name)
-      }),
+      });
     }
+
+    self.write(|note| {
+      note
+        .matter
+        .links
+        .get_or_insert(Vec::new())
+        .retain(|link| link != name)
+    })
   }
 
-  /// Attempts to add `name` as a tag to the current note.
   pub(crate) fn add_tag(&mut self, name: &str) -> Result<Self> {
-    match self.has_tag(name) {
-      true => Err(Error::TagExists {
+    if self.has_tag(name) {
+      return Err(Error::TagExists {
         tag: name.to_string(),
-      }),
-      _ => self.write(|note| {
-        note
-          .matter
-          .tags
-          .get_or_insert(Vec::new())
-          .push(name.to_string())
-      }),
+      });
     }
+
+    self.write(|note| {
+      note
+        .matter
+        .tags
+        .get_or_insert(Vec::new())
+        .push(name.to_string())
+    })
   }
 
-  /// Attempts to remove `name` as a tag from the current note.
   pub(crate) fn remove_tag(&mut self, name: &str) -> Result<Self> {
-    match !self.has_tag(name) {
-      true => Err(Error::TagMissing {
+    if !self.has_tag(name) {
+      return Err(Error::TagMissing {
         tag: name.to_string(),
         name: self.id.to_string(),
-      }),
-      _ => self.write(|note| {
-        note
-          .matter
-          .tags
-          .get_or_insert(Vec::new())
-          .retain(|tag| tag != name)
-      }),
+      });
     }
+
+    self.write(|note| {
+      note
+        .matter
+        .tags
+        .get_or_insert(Vec::new())
+        .retain(|tag| tag != name)
+    })
   }
 
-  /// Remove this notes file on disk.
   pub(crate) fn remove(&self) -> Result<()> {
     Ok(fs::remove_file(&self.path)?)
   }
 
-  /// Write this notes contents after performing an (optional) operation.
   fn write<F: Fn(&mut Note)>(&mut self, f: F) -> Result<Self> {
     f(self);
     let mut file = File::create(&self.path)?;
@@ -163,9 +155,11 @@ mod tests {
   fn add_link() {
     in_temp_dir!({
       let mut a = create_note("a").unwrap();
+
       let link = NoteId::new("b").to_string();
 
       a.add_link(&link).unwrap();
+
       assert!(a.has_link(&link));
     });
   }
@@ -213,8 +207,8 @@ mod tests {
       let mut a = create_note("a").unwrap();
 
       a.add_tag("software").unwrap();
-      assert!(a.has_tag("software"));
 
+      assert!(a.has_tag("software"));
       assert!(a.add_tag("software").is_err());
     });
   }

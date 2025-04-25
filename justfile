@@ -68,7 +68,7 @@ run *args:
 
 [group: 'test']
 test:
-  cargo test
+  cargo test -- --test-threads 1
 
 [group: 'test']
 test-release-workflow:
