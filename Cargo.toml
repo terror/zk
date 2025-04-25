@@ -1,39 +1,36 @@
 [package]
-name        = "zkt"
-version     = "0.0.3"
+name = "zk-cli"
+version = "0.1.0"
 description = "A note-taking tool based on the famous Zettelkasten method"
-authors     = ["Liam <liam@scalzulli.com>"]
-license     = "CC0-1.0"
-homepage    = "https://github.com/terror/zk"
-repository  = "https://github.com/terror/zk"
-edition     = "2018"
-categories  = ["command-line-utilities"]
-keywords    = ["command-line", "productivity", "note-taking", "utility"]
-resolver    = "2"
+authors = ["Liam <liam@scalzulli.com>"]
+license = "CC0-1.0"
+homepage = "https://github.com/terror/zk"
+repository = "https://github.com/terror/zk"
+edition = "2018"
+categories = ["command-line-utilities"]
+keywords = ["command-line", "productivity", "note-taking", "utility"]
+resolver = "2"
 
 [[bin]]
 name = "zk"
 path = "src/main.rs"
 
 [dependencies]
-chrono      = "0.4.19"
-colored     = "2.0.0"
-dirs        = "4.0.0"
-indoc       = "1.0.3"
-matter      = "0.1.0-alpha4"
-serde_yaml  = "0.8.23"
-shellexpand = "2.1.0"
-skim        = "0.9.4"
-snafu       = "0.6.10"
-structopt   = "0.3.25"
-toml        = "0.5.8"
-walkdir     = "2.3.2"
-xdg         = "2.4.0"
-
-[dependencies.serde]
-version  = "1.0.132"
-features = ["derive"]
+chrono = "0.4.40"
+colored = "2.2.0"
+dirs = "4.0.0"
+indoc = "1.0.9"
+matter = "0.1.0-alpha4"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.8.26"
+shellexpand = "2.1.2"
+skim = "0.9.4"
+snafu = "0.6.10"
+structopt = "0.3.26"
+toml = "0.5.11"
+walkdir = "2.5.0"
+xdg = "2.5.2"
 
 [dev-dependencies]
-pretty_assertions = "1.0.0"
-tempfile          = "3.2.0"
+pretty_assertions = "1.4.1"
+tempfile = "3.19.1"

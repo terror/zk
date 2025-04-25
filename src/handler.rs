@@ -11,9 +11,6 @@ impl Handler {
     Self { config, directory }
   }
 
-  /// Creates a new note with the specified `name` in the Zettelkasten directory
-  /// with an appropriate prefix, in addition to writing the default YAML
-  /// frontmatter.
   pub fn create(&self, name: &str) -> Result<()> {
     self.open(
       &Note::create(self.directory.path.join(NoteId::new(name).to_string()))?
@@ -22,10 +19,6 @@ impl Handler {
     )
   }
 
-  /// Opens a note given a `name` using the editor specified in the
-  /// configuration file. If there are multiple notes present with the
-  /// same `name`, the user will be prompted with `skim` to choose
-  /// which file is desired to be opened.
   pub(crate) fn open(&self, name: &str) -> Result<()> {
     Search::new(self.directory.find(name)?)
       .run()?
@@ -36,8 +29,6 @@ impl Handler {
       })
   }
 
-  /// Links two notes together. This entails checking and modifying both notes'
-  /// YAML frontmatter to ensure a link is created.
   pub(crate) fn link(&self, left: &str, right: &str) -> Result<()> {
     let mut left = Search::new(self.directory.find(left)?)
       .run()?
@@ -57,9 +48,6 @@ impl Handler {
     Ok(())
   }
 
-  /// Finds all notes given a `tag`. This method invokes `skim` using the
-  /// names of the notes that contain `tag` within the frontmatter and
-  /// attempts to open each selected item.
   pub(crate) fn find(&self, tag: &str) -> Result<()> {
     Search::new(self.directory.find_by_tag(tag)?)
       .run()?
@@ -70,8 +58,6 @@ impl Handler {
       })
   }
 
-  /// Starts a fuzzy search using note id's in the Zettelkasten directory.
-  /// Powered by `skim` --> https://github.com/lotabout/skim
   pub(crate) fn search(&self) -> Result<()> {
     Search::new(self.directory.notes()?)
       .run()?
@@ -82,15 +68,10 @@ impl Handler {
       })
   }
 
-  /// Writes the current Zettelkasten storage location to stdout.
   pub fn dir(&self) {
     println!("{}", self.directory.path.expand().display());
   }
 
-  /// Removes an existing note in the Zettelkasten directory. This will
-  /// also prompt the user if more than one note exists with `name`.
-  /// This method should scan all notes with a link to the soon to be
-  /// deleted note and remove those links.
   pub(crate) fn remove(&self, name: &str) -> Result<()> {
     Search::new(self.directory.find(name)?)
       .run()?
@@ -109,7 +90,6 @@ impl Handler {
       })
   }
 
-  /// Removes a link between two existing notes.
   pub(crate) fn remove_link(&self, left: &str, right: &str) -> Result<()> {
     let mut left = Search::new(self.directory.find(left)?)
       .run()?
@@ -129,7 +109,6 @@ impl Handler {
     Ok(())
   }
 
-  /// Adds a tag to an existing note.
   pub(crate) fn tag(&self, name: &str, tag: &str) -> Result<()> {
     Search::new(self.directory.find(name)?)
       .run()?
@@ -141,7 +120,6 @@ impl Handler {
       })
   }
 
-  /// Removes a tag from an existing note.
   pub(crate) fn remove_tag(&self, name: &str, tag: &str) -> Result<()> {
     Search::new(self.directory.find(name)?)
       .run()?
@@ -153,7 +131,6 @@ impl Handler {
       })
   }
 
-  /// Explore a notes links recursively.
   pub(crate) fn explore(&self, name: &str) -> Result<()> {
     let note = Search::new(self.directory.find(name)?)
       .run()?

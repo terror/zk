@@ -17,11 +17,8 @@ mod path_ext;
 mod search;
 
 fn main() {
-  match Opt::from_args().run() {
-    Ok(()) => {}
-    Err(e) => {
-      eprintln!("{}: {}", "error".red(), e);
-      process::exit(1);
-    }
+  if let Err(error) = Opt::from_args().run() {
+    eprintln!("{}: {error}", "error".red());
+    process::exit(1);
   }
 }

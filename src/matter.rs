@@ -20,7 +20,6 @@ impl Matter {
     }
   }
 
-  /// Return the default YAML frontmatter as bytes.
   pub(crate) fn default(name: &str) -> Result<Vec<u8>> {
     Ok(
       Self::into(Matter::new(name, None, None))?
@@ -29,7 +28,6 @@ impl Matter {
     )
   }
 
-  /// Parse a string `content` into a `Matter` instance.
   pub(crate) fn from(content: &str) -> Result<Self> {
     Ok(serde_yaml::from_str(
       content
@@ -40,7 +38,6 @@ impl Matter {
     )?)
   }
 
-  /// Parse a `Matter` struct into a string.
   pub(crate) fn into(matter: Matter) -> Result<String> {
     Ok(format!("{}---\n", serde_yaml::to_string(&matter)?))
   }

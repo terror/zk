@@ -10,8 +10,6 @@ impl Directory {
     Self { path }
   }
 
-  /// Constructs a `Vec<Note>` based on a the directories path. This attempts to
-  /// convert each instance of a file with extension `md` into a `Note`.
   pub fn notes(&self) -> Result<Vec<Note>> {
     WalkDir::new(&self.path)
       .into_iter()
@@ -19,37 +17,30 @@ impl Directory {
       .iter()
       .cloned()
       .map(|entry| entry.into_path())
-      .filter(|entry| entry.is_file() && entry.ext() == "md")
+      .filter(|entry| entry.is_file() && entry.unwrapped_extension() == "md")
       .map(Note::from)
       .collect::<Result<Vec<_>, _>>()
   }
 
-  /// Finds all notes that reside within this directories `path` whose name
-  /// matches `name`. This method either returns a list of `Note` instances
-  /// who meet this criteria or `None`, indicating that the criteria was
-  /// not met.
   pub(crate) fn find(&self, name: &str) -> Result<Vec<Note>> {
-    let ret = &self
+    let notes = &self
       .notes()?
       .iter()
       .filter(|note| note.id.name == name)
       .cloned()
       .collect::<Vec<Note>>();
 
-    match ret.len() {
-      0 => Err(Error::NoteNotFound {
+    if notes.is_empty() {
+      return Err(Error::NoteNotFound {
         name: name.to_owned(),
-      }),
-      _ => Ok(ret.to_vec()),
+      });
     }
+
+    Ok(notes.to_vec())
   }
 
-  /// Finds all notes that reside within this directories `path` whose
-  /// list of tags contains the value `tag`. This method either returns a list
-  /// of `Note` instances who meet this criteria or `None`, indicating
-  /// that the criteria was not met.
   pub(crate) fn find_by_tag(&self, tag: &str) -> Result<Vec<Note>> {
-    let ret = &self
+    let notes = &self
       .notes()?
       .iter()
       .filter(|note| {
@@ -63,12 +54,13 @@ impl Directory {
       .cloned()
       .collect::<Vec<Note>>();
 
-    match ret.len() {
-      0 => Err(Error::TagNotFound {
+    if notes.is_empty() {
+      return Err(Error::TagNotFound {
         tag: tag.to_owned(),
-      }),
-      _ => Ok(ret.to_vec()),
+      });
     }
+
+    Ok(notes.to_vec())
   }
 }
 
