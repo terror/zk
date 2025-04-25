@@ -19,7 +19,7 @@ check:
 
 [group: 'check']
 ci: test clippy forbid
-  cargo +nightly fmt --all -- --check
+  cargo fmt --all -- --check
   cargo update --locked --package zk-cli
 
 [group: 'check']
@@ -28,11 +28,11 @@ clippy:
 
 [group: 'format']
 fmt:
-  cargo +nightly fmt
+  cargo fmt
 
 [group: 'format']
 fmt-check:
-  cargo +nightly fmt --all -- --check
+  cargo fmt --all -- --check
 
 [group: 'check']
 forbid:
@@ -44,9 +44,8 @@ install:
 
 [group: 'dev']
 install-dev-deps:
-  rustup install nightly
-  rustup update nightly
   cargo install cargo-watch
+  cargo install present
 
 [group: 'release']
 publish:
