@@ -12,7 +12,7 @@ macro_rules! in_temp_dir {
 }
 
 pub(crate) fn create_note(name: &str) -> Result<Note> {
-  Note::create(env::current_dir()?.join(&NoteId::new(name).to_string()))
+  Note::create(env::current_dir()?.join(NoteId::new(name).to_string()))
 }
 
 pub(crate) fn sleep() {

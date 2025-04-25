@@ -223,11 +223,12 @@ mod tests {
   fn add_link_existing() {
     in_temp_dir!({
       let mut a = create_note("a").unwrap();
+
       let link = NoteId::new("b").to_string();
 
       a.add_link(&link).unwrap();
-      assert!(a.has_link(&link));
 
+      assert!(a.has_link(&link));
       assert!(a.add_link(&link).is_err());
     });
   }
