@@ -64,7 +64,7 @@ jobs:
         run: cargo build
 
       - name: Lockfile
-        run: cargo update --locked --package zk
+        run: cargo update --locked --package zk-cli
 
       - name: Lint
         run: cargo clippy --all-targets --all-features
