@@ -3,9 +3,9 @@
 <img align="right" width="225" height="120" src="./assets/zk.png">
 
 [![release](https://img.shields.io/github/release/terror/zk.svg?label=release&style=flat&labelColor=282c34&logo=github)](https://github.com/terror/zk/releases/latest)
-[![crates.io](https://shields.io/crates/v/zk.svg)](https://crates.io/crates/zk)
+[![crates.io](https://shields.io/crates/v/zk-cli.svg)](https://crates.io/crates/zk-cli)
 [![CI](https://github.com/terror/zk/actions/workflows/ci.yaml/badge.svg)](https://github.com/terror/zk/actions/workflows/ci.yaml)
-[![dependency status](https://deps.rs/repo/github/terror/zk/status.svg)](https://deps.rs/repo/github/terror/zk)
+[![dependency status](https://deps.rs/repo/github/terror/zk-cli/status.svg)](https://deps.rs/repo/github/terror/zk-cli)
 
 A note-taking tool based on the famous *Zettelkasten* method with support for
 fuzzy searching, tags & link exploration, in Rust!
