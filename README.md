@@ -24,7 +24,7 @@ making new connections between seemingly unrelated ideas.
 - Works with a flat directory of markdown files
 - Minimal configuration with sensible defaults
 
-### Demo
+## Demo
 
 Here is a quick demo showcasing the new, search, tag, link and explore
 features.
