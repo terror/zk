@@ -23,10 +23,6 @@ RUSTFLAGS="--deny warnings --codegen target-feature=+crt-static $TARGET_RUSTFLAG
 
 EXECUTABLE=target/$TARGET/release/zk
 
-if [[ $OS == windows-latest ]]; then
-  EXECUTABLE=$EXECUTABLE.exe
-fi
-
 echo "Copying release files..."
 
 mkdir dist
@@ -48,10 +44,5 @@ case $OS in
     ARCHIVE=zk-$VERSION-$TARGET.tar.gz
     tar czf "$ARCHIVE" ./*
     echo "archive=$DIST/$ARCHIVE" >> "$GITHUB_OUTPUT"
-    ;;
-  windows-latest)
-    ARCHIVE=zk-$VERSION-$TARGET.zip
-    7z a "$ARCHIVE" ./*
-    echo "archive=$(pwd -W)/$ARCHIVE" >> "$GITHUB_OUTPUT"
     ;;
 esac

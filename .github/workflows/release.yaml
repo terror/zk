@@ -38,8 +38,6 @@ jobs:
         - arm-unknown-linux-musleabihf
         - armv7-unknown-linux-musleabihf
         - x86_64-apple-darwin
-        - x86_64-pc-windows-msvc
-        - aarch64-pc-windows-msvc
         - x86_64-unknown-linux-musl
         include:
         - target: aarch64-apple-darwin
@@ -56,11 +54,6 @@ jobs:
           target_rustflags: '--codegen linker=arm-linux-gnueabihf-gcc'
         - target: x86_64-apple-darwin
           os: macos-latest
-          target_rustflags: ''
-        - target: x86_64-pc-windows-msvc
-          os: windows-latest
-        - target: aarch64-pc-windows-msvc
-          os: windows-latest
           target_rustflags: ''
         - target: x86_64-unknown-linux-musl
           os: ubuntu-latest
@@ -90,11 +83,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gcc-arm-linux-gnueabihf
-
-    - name: Install AArch64 Toolchain (Windows)
-      if: ${{ matrix.target == 'aarch64-pc-windows-msvc' }}
-      run: |
-        rustup target add aarch64-pc-windows-msvc
 
     - name: Configure compiler for musl targets
       if: ${{ contains(matrix.target, 'musl') }}
