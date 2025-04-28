@@ -31,7 +31,8 @@ features.
 
 ## Installation
 
-`zk` should run on any system, including Linux, MacOS, and the BSDs.
+`zk` should run on most systems, including Linux, MacOS, and the BSDs. Windows
+support is being worked on!
 
 The easiest way to install it is by using [cargo](https://doc.rust-lang.org/cargo/index.html),
 the Rust package manager:
