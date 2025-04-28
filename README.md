@@ -5,7 +5,7 @@
 [![release](https://img.shields.io/github/release/terror/zk.svg?label=release&style=flat&labelColor=282c34&logo=github)](https://github.com/terror/zk/releases/latest)
 [![crates.io](https://shields.io/crates/v/zk-cli.svg)](https://crates.io/crates/zk-cli)
 [![CI](https://github.com/terror/zk/actions/workflows/ci.yaml/badge.svg)](https://github.com/terror/zk/actions/workflows/ci.yaml)
-[![dependency status](https://deps.rs/repo/github/terror/zk-cli/status.svg)](https://deps.rs/repo/github/terror/zk-cli)
+[![dependency status](https://deps.rs/repo/github/terror/zk/status.svg)](https://deps.rs/repo/github/terror/zk)
 
 A note-taking tool based on the famous *Zettelkasten* method with support for
 fuzzy searching, tags & link exploration, in Rust!
@@ -43,7 +43,7 @@ cargo install zk-cli
 
 ### Pre-built binaries
 
-Pre-built binaries for Linux, MacOS, and Windows can be found on [the releases
+Pre-built binaries for Linux and MacOS can be found on [the releases
 page](https://github.com/terror/zk/releases).
 
 ## Usage
